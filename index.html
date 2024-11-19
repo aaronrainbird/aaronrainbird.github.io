@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Tree Sales Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .table-cell { 
+            padding: 8px; 
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+        .sortable {
+            cursor: pointer;
+        }
+        .sortable:hover {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="p-6">
+        <!-- Header -->
+        <div class="mb-6 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">Christmas Tree Sales Dashboard</h1>
+            <input type="file" accept=".csv" id="csvFile" class="file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-500">Stock Status</h3>
+                <div class="mt-2 flex items-baseline">
+                    <div class="text-2xl font-semibold text-gray-900" id="stockStatus">0/0</div>
+                    <div class="ml-2 text-sm text-gray-500">trees</div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-500">Total Spent on Stock</h3>
+                <div class="mt-2 flex items-baseline">
+                    <div class="text-2xl font-semibold text-gray-900" id="totalSpent">£0</div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-500">Total Sales Revenue</h3>
+                <div class="mt-2 flex items-baseline">
+                    <div class="text-2xl font-semibold text-gray-900" id="totalSales">£0</div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-500">Total Net Profit</h3>
+                <div class="mt-2 flex items-baseline">
+                    <div class="text-2xl font-semibold" id="totalProfit">£0</div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-sm font-medium text-gray-500">Delivery vs Collection</h3>
+                <div class="mt-2 flex items-baseline space-x-4">
+                    <div>
+                        <span class="text-sm text-gray-500">Delivery:</span>
+                        <span class="text-xl font-semibold text-gray-900" id="deliveryCount">0</span>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500">Collection:</span>
+                        <span class="text-xl font-semibold text-gray-900" id="collectionCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Data Table -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="p-6">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="table-cell sortable" onclick="sortTable(0)">Tree Size</th>
+                            <th class="table-cell sortable" onclick="sortTable(1, 'number')">Total Stock Purchased</th>
+                            <th class="table-cell sortable" onclick="sortTable(2, 'number')">Stock Cost</th>
+                            <th class="table-cell sortable" onclick="sortTable(3, 'number')">Sale Price</th>
+                            <th class="table-cell sortable" onclick="sortTable(4, 'number')">Total Sold</th>
+                            <th class="table-cell sortable" onclick="sortTable(5, 'number')">Total Earnings</th>
+                            <th class="table-cell sortable" onclick="sortTable(6, 'number')">Net Profit</th>
+                            <th class="table-cell sortable" onclick="sortTable(7, 'number')">% Sold</th>
+                            <th class="table-cell sortable" onclick="sortTable(8, 'number')">Total Remaining</th>
+                            <th class="table-cell sortable" onclick="sortTable(9, 'number')">Remaining Stock Cost</th>
+                            <th class="table-cell sortable" onclick="sortTable(10, 'number')">Remaining Stock Value</th>
+                            <th class="table-cell sortable" onclick="sortTable(11, 'number')">Potential Net Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesData" class="divide-y divide-gray-200"></tbody>
+                    <tfoot>
+                        <tr class="bg-gray-50 font-medium">
+                            <td class="table-cell">TOTALS</td>
+                            <td class="table-cell" id="totalStockPurchasedSum"></td>
+                            <td class="table-cell" id="totalStockCostSum"></td>
+                            <td class="table-cell">-</td>
+                            <td class="table-cell" id="totalSoldSum"></td>
+                            <td class="table-cell" id="totalEarningsSum"></td>
+                            <td class="table-cell" id="netProfitSum"></td>
+                            <td class="table-cell" id="totalPercentageSum"></td>
+                            <td class="table-cell" id="totalRemainingSum"></td>
+                            <td class="table-cell" id="remainingCostSum"></td>
+                            <td class="table-cell" id="remainingValueSum"></td>
+                            <td class="table-cell" id="potentialProfitSum"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sales Trend -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Daily Sales Trend</h3>
+                <div class="flex gap-2" id="treeFilters"></div>
+            </div>
+            <canvas id="salesTrendChart"></canvas>
+        </div>
+    </div>
+    <script>
+        const treeData = [
+            {
+                name: "Nordman Fir Small",
+                size: "125-150cm",
+                costPrice: 12.75,
+                salePrice: 40.00,
+                totalStock: 20,
+                soldCount: 0,
+                sku: "SQ0024007",
+                color: 'rgb(59, 130, 246)'
+            },
+            {
+                name: "Nordman Fir Medium",
+                size: "150-175cm",
+                costPrice: 17.50,
+                salePrice: 50.00,
+                totalStock: 40,
+                soldCount: 0,
+                sku: "SQ6321018",
+                color: 'rgb(16, 185, 129)'
+            },
+            {
+                name: "Nordman Fir Large",
+                size: "175-200cm",
+                costPrice: 22.50,
+                salePrice: 60.00,
+                totalStock: 70,
+                soldCount: 0,
+                sku: "SQ2505107",
+                color: 'rgb(251, 191, 36)'
+            },
+            {
+                name: "Nordman Fir XL",
+                size: "200-225cm",
+                costPrice: 28.00,
+                salePrice: 70.00,
+                totalStock: 50,
+                soldCount: 0,
+                sku: "SQ4316627",
+                color: 'rgb(239, 68, 68)'
+            },
+            {
+                name: "Nordman Fir XXL",
+                size: "225-250cm",
+                costPrice: 33.50,
+                salePrice: 80.00,
+                totalStock: 10,
+                soldCount: 0,
+                sku: "SQ2007334",
+                color: 'rgb(139, 92, 246)'
+            }
+        ];
+ 
+        let salesTrendChart;
+        let dailySalesByTree = {};
+        let sortDirection = 1;
+        let lastSortedColumn = -1;
+ 
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    complete: processData
+                });
+            }
+        });
+ 
+        function processData(results) {
+            const orders = results.data;
+            dailySalesByTree = {};
+            let deliveryCount = 0;
+            let collectionCount = 0;
+            
+            // Reset tree data
+            treeData.forEach(tree => {
+                tree.soldCount = 0;
+                dailySalesByTree[tree.sku] = {};
+            });
+ 
+            orders.forEach(order => {
+                if (!order['Lineitem sku'] || 
+                    !order['Lineitem quantity'] || 
+                    order['Lineitem name'].includes('Private Hire Package') ||
+                    order['Lineitem name'].includes('Wreath')) {
+                    return;
+                }
+ 
+                const date = order['Created at'].split(' ')[0];
+                const sku = order['Lineitem sku'];
+                const quantity = parseInt(order['Lineitem quantity']);
+ 
+                if (order['Shipping Method']?.includes('Delivery')) {
+                    deliveryCount++;
+                } else {
+                    collectionCount++;
+                }
+ 
+                const tree = treeData.find(t => t.sku === sku);
+                if (tree) {
+                    tree.soldCount += quantity;
+                    if (!dailySalesByTree[sku][date]) {
+                        dailySalesByTree[sku][date] = 0;
+                    }
+                    dailySalesByTree[sku][date] += quantity;
+                }
+            });
+ 
+            document.getElementById('deliveryCount').textContent = deliveryCount;
+            document.getElementById('collectionCount').textContent = collectionCount;
+ 
+            updateKPIs();
+            updateTable();
+            createTreeFilters();
+            updateSalesTrendChart('all');
+        }
+ 
+        function sortTable(columnIndex, type = 'string') {
+            const tbody = document.getElementById('salesData');
+            const rows = Array.from(tbody.getElementsByTagName('tr'));
+            
+            if (lastSortedColumn === columnIndex) {
+                sortDirection *= -1;
+            } else {
+                sortDirection = 1;
+            }
+            lastSortedColumn = columnIndex;
+            
+            rows.sort((a, b) => {
+                let aValue = a.children[columnIndex].textContent.trim();
+                let bValue = b.children[columnIndex].textContent.trim();
+                
+                if (type === 'number') {
+                    aValue = parseFloat(aValue.replace(/[£,%]/g, ''));
+                    bValue = parseFloat(bValue.replace(/[£,%]/g, ''));
+                }
+                
+                return sortDirection * (aValue > bValue ? 1 : -1);
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+ 
+        function calculateProfitIntensity(currentProfit, maxProfit) {
+            if (currentProfit <= 0) return 'rgba(0, 0, 0, 0)';
+            const intensity = Math.floor((currentProfit / maxProfit) * 100);
+            return `rgba(22, 163, 74, ${intensity / 100})`;
+        }
+ 
+        function calculateCostIntensity(cost, maxCost) {
+            if (cost === 0) return 'rgb(0, 0, 0)';
+            const intensity = Math.floor((cost / maxCost) * 255);
+            return `rgb(${intensity}, 0, 0)`;
+        }
+ 
+        function updateKPIs() {
+            const totalSpent = treeData.reduce((sum, tree) => sum + (tree.totalStock * tree.costPrice), 0);
+            const totalRevenue = treeData.reduce((sum, tree) => sum + (tree.soldCount * (tree.salePrice / 1.2)), 0);
+            const totalProfit = totalRevenue - totalSpent;
+            const totalStock = treeData.reduce((sum, tree) => sum + tree.totalStock, 0);
+            const stockRemaining = treeData.reduce((sum, tree) => sum + (tree.totalStock - tree.soldCount), 0);
+ 
+            document.getElementById('stockStatus').textContent = `${stockRemaining}/${totalStock}`;
+            document.getElementById('totalSpent').textContent = formatCurrency(totalSpent);
+            document.getElementById('totalSales').textContent = formatCurrency(totalRevenue);
+            document.getElementById('totalProfit').textContent = formatCurrency(totalProfit);
+        }
+ 
+        function updateTable() {
+    const tbody = document.getElementById('salesData');
+    tbody.innerHTML = '';
+
+    const maxProfit = Math.max(...treeData.map(tree => {
+        const netSalePrice = tree.salePrice / 1.2;
+        const totalEarnings = tree.soldCount * netSalePrice;
+        const stockCost = tree.totalStock * tree.costPrice;
+        return totalEarnings - stockCost;
+    }));
+    
+    const maxCost = Math.max(...treeData.map(tree => 
+        (tree.totalStock - tree.soldCount) * tree.costPrice
+    ));
+
+    let totals = {
+        totalStock: 0,
+        stockCost: 0,
+        totalSold: 0,
+        totalEarnings: 0,
+        netProfit: 0,
+        totalRemaining: 0,
+        remainingCost: 0,
+        remainingValue: 0,
+        potentialProfit: 0
+    };
+
+    treeData.forEach(tree => {
+        const netSalePrice = tree.salePrice / 1.2;
+        const stockCost = tree.totalStock * tree.costPrice;
+        const remaining = tree.totalStock - tree.soldCount;
+        const soldPercentage = (tree.soldCount / tree.totalStock) * 100;
+        const totalEarnings = tree.soldCount * netSalePrice;
+        const netProfit = totalEarnings - stockCost;
+        const remainingCost = remaining * tree.costPrice;
+        const remainingValue = remaining * netSalePrice;
+        const potentialProfit = (tree.totalStock * netSalePrice) - stockCost;
+
+        totals.totalStock += tree.totalStock;
+        totals.stockCost += stockCost;
+        totals.totalSold += tree.soldCount;
+        totals.totalEarnings += totalEarnings;
+        totals.netProfit += netProfit;
+        totals.totalRemaining += remaining;
+        totals.remainingCost += remainingCost;
+        totals.remainingValue += remainingValue;
+        totals.potentialProfit += potentialProfit;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="table-cell">${tree.size}</td>
+            <td class="table-cell">${tree.totalStock}</td>
+            <td class="table-cell">${formatCurrency(stockCost)}</td>
+            <td class="table-cell">${formatCurrency(netSalePrice)}</td>
+            <td class="table-cell">${tree.soldCount}</td>
+            <td class="table-cell">${formatCurrency(totalEarnings)}</td>
+            <td class="table-cell" style="background-color: ${calculateProfitIntensity(netProfit, maxProfit)}">${formatCurrency(netProfit)}</td>
+            <td class="table-cell ${soldPercentage >= 80 ? 'text-red-600 font-semibold' : ''}">${soldPercentage.toFixed(1)}%</td>
+            <td class="table-cell ${soldPercentage >= 80 ? 'text-red-600 font-semibold' : ''}">${remaining}</td>
+            <td class="table-cell" style="color: ${calculateCostIntensity(remainingCost, maxCost)}">-${formatCurrency(remainingCost)}</td>
+            <td class="table-cell">${formatCurrency(remainingValue)}</td>
+            <td class="table-cell">${formatCurrency(potentialProfit)}</td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // Update footer totals
+    document.getElementById('totalStockPurchasedSum').textContent = totals.totalStock;
+    document.getElementById('totalStockCostSum').textContent = formatCurrency(totals.stockCost);
+    document.getElementById('totalSoldSum').textContent = totals.totalSold;
+    document.getElementById('totalEarningsSum').textContent = formatCurrency(totals.totalEarnings);
+    document.getElementById('netProfitSum').textContent = formatCurrency(totals.netProfit);
+    document.getElementById('totalPercentageSum').textContent = 
+        ((totals.totalSold / totals.totalStock) * 100).toFixed(1) + '%';
+    document.getElementById('totalRemainingSum').textContent = totals.totalRemaining;
+    document.getElementById('remainingCostSum').textContent = '-' + formatCurrency(totals.remainingCost);
+    document.getElementById('remainingValueSum').textContent = formatCurrency(totals.remainingValue);
+    document.getElementById('potentialProfitSum').textContent = formatCurrency(totals.potentialProfit);
+}
+ 
+        function createTreeFilters() {
+            const container = document.getElementById('treeFilters');
+            container.innerHTML = '';
+ 
+            const allButton = document.createElement('button');
+            allButton.className = 'px-3 py-1 text-sm font-medium text-white bg-gray-600 rounded hover:bg-gray-700';
+            allButton.textContent = 'All Trees';
+            allButton.onclick = () => updateSalesTrendChart('all');
+            container.appendChild(allButton);
+ 
+            treeData.forEach(tree => {
+                const button = document.createElement('button');
+                button.className = 'px-3 py-1 text-sm font-medium text-white rounded hover:opacity-80';
+                button.style.backgroundColor = tree.color;
+                button.textContent = tree.size;
+                button.onclick = () => updateSalesTrendChart(tree.sku);
+                container.appendChild(button);
+            });
+        }
+ 
+        function updateSalesTrendChart(filter) {
+            const dates = new Set();
+            Object.values(dailySalesByTree).forEach(treeSales => {
+                Object.keys(treeSales).forEach(date => dates.add(date));
+            });
+            const sortedDates = Array.from(dates).sort();
+ 
+            const datasets = filter === 'all' 
+                ? treeData.map(tree => ({
+                    label: tree.size,
+                    data: sortedDates.map(date => dailySalesByTree[tree.sku][date] || 0),
+                    borderColor: tree.color,
+                    backgroundColor: tree.color,
+                    tension: 0.1
+                }))
+                : [{
+                    label: treeData.find(t => t.sku === filter).size,
+                    data: sortedDates.map(date => dailySalesByTree[filter][date] || 0),
+                    borderColor: treeData.find(t => t.sku === filter).color,
+                    backgroundColor: treeData.find(t => t.sku === filter).color,
+                    tension: 0.1
+                }];
+ 
+            if (salesTrendChart) salesTrendChart.destroy();
+            salesTrendChart = new Chart(document.getElementById('salesTrendChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Trees Sold'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+ 
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-GB', {
+                style: 'currency',
+                currency: 'GBP',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(Math.abs(value));
+        }
+ 
+        // Initialize empty chart
+        updateSalesTrendChart('all');
+    </script>
+ </body>
+ </html>
