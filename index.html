@@ -191,35 +191,47 @@
         });
  
         function processData(results) {
-            const orders = results.data;
-            dailySalesByTree = {};
-            let deliveryCount = 0;
-            let collectionCount = 0;
-            
-            // Reset tree data
-            treeData.forEach(tree => {
-                tree.soldCount = 0;
-                dailySalesByTree[tree.sku] = {};
-            });
- 
-            orders.forEach(order => {
-                if (!order['Lineitem sku'] || 
-                    !order['Lineitem quantity'] || 
-                    order['Lineitem name'].includes('Private Hire Package') ||
-                    order['Lineitem name'].includes('Wreath')) {
-                    return;
-                }
- 
-                const date = order['Created at'].split(' ')[0];
-                const sku = order['Lineitem sku'];
-                const quantity = parseInt(order['Lineitem quantity']);
- 
-                if (order['Shipping Method']?.includes('Delivery')) {
-                    deliveryCount++;
-                } else {
-                    collectionCount++;
-                }
- 
+    const orders = results.data;
+    dailySalesByTree = {};
+    let deliveryCount = 0;
+    let collectionCount = 0;
+    
+    // Create a set of valid SKUs for quick lookup
+    const validSkus = new Set([
+        'SQ2505107', // Large
+        'SQ2007334', // XXL
+        'SQ0024007', // Small
+        'SQ6321018', // Medium
+        'SQ4316627'  // XL
+    ]);
+
+    // Reset tree data
+    treeData.forEach(tree => {
+        tree.soldCount = 0;
+        dailySalesByTree[tree.sku] = {};
+    });
+
+    // Group orders by Order ID
+    const orderGroups = {};
+    orders.forEach(order => {
+        const orderId = order['Order ID'];
+        if (!orderGroups[orderId]) {
+            orderGroups[orderId] = [];
+        }
+        orderGroups[orderId].push(order);
+    });
+
+    // Process each order
+    Object.entries(orderGroups).forEach(([orderId, items]) => {
+        // Check if order contains ONLY trees and no other products
+        const containsOnlyTrees = items.every(item => validSkus.has(item['Lineitem sku']));
+        
+        items.forEach(item => {
+            const sku = item['Lineitem sku'];
+            if (validSkus.has(sku) && item['Lineitem quantity']) {
+                const date = item['Created at'].split(' ')[0];
+                const quantity = parseInt(item['Lineitem quantity']);
+                
                 const tree = treeData.find(t => t.sku === sku);
                 if (tree) {
                     tree.soldCount += quantity;
@@ -228,16 +240,27 @@
                     }
                     dailySalesByTree[sku][date] += quantity;
                 }
-            });
- 
-            document.getElementById('deliveryCount').textContent = deliveryCount;
-            document.getElementById('collectionCount').textContent = collectionCount;
- 
-            updateKPIs();
-            updateTable();
-            createTreeFilters();
-            updateSalesTrendChart('all');
+            }
+        });
+
+        // Only count delivery/collection if order contains ONLY trees
+        if (containsOnlyTrees && items.length > 0) {
+            if (items[0]['Shipping Method']?.includes('Delivery')) {
+                deliveryCount++;
+            } else {
+                collectionCount++;
+            }
         }
+    });
+
+    document.getElementById('deliveryCount').textContent = deliveryCount;
+    document.getElementById('collectionCount').textContent = collectionCount;
+
+    updateKPIs();
+    updateTable();
+    createTreeFilters();
+    updateSalesTrendChart('all');
+}
  
         function sortTable(columnIndex, type = 'string') {
             const tbody = document.getElementById('salesData');
