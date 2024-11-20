@@ -126,7 +126,7 @@
             {
                 name: "Nordman Fir Small",
                 size: "125-150cm",
-                costPrice: 12.75,
+                costPrice: 15.30,
                 salePrice: 40.00,
                 totalStock: 20,
                 soldCount: 0,
@@ -136,7 +136,7 @@
             {
                 name: "Nordman Fir Medium",
                 size: "150-175cm",
-                costPrice: 17.50,
+                costPrice: 21.00,
                 salePrice: 50.00,
                 totalStock: 40,
                 soldCount: 0,
@@ -156,7 +156,7 @@
             {
                 name: "Nordman Fir XL",
                 size: "200-225cm",
-                costPrice: 28.00,
+                costPrice: 33.60,
                 salePrice: 70.00,
                 totalStock: 50,
                 soldCount: 0,
@@ -166,7 +166,7 @@
             {
                 name: "Nordman Fir XXL",
                 size: "225-250cm",
-                costPrice: 33.50,
+                costPrice: 40.20,
                 salePrice: 80.00,
                 totalStock: 13,
                 soldCount: 0,
@@ -302,7 +302,7 @@
  
         function updateKPIs() {
             const totalSpent = treeData.reduce((sum, tree) => sum + (tree.totalStock * tree.costPrice), 0);
-            const totalRevenue = treeData.reduce((sum, tree) => sum + (tree.soldCount * (tree.salePrice / 1.2)), 0);
+            const totalRevenue = treeData.reduce((sum, tree) => sum + (tree.soldCount * tree.salePrice), 0);
             const totalProfit = totalRevenue - totalSpent;
             const totalStock = treeData.reduce((sum, tree) => sum + tree.totalStock, 0);
             const stockRemaining = treeData.reduce((sum, tree) => sum + (tree.totalStock - tree.soldCount), 0);
@@ -318,8 +318,7 @@
     tbody.innerHTML = '';
 
     const maxProfit = Math.max(...treeData.map(tree => {
-        const netSalePrice = tree.salePrice / 1.2;
-        const totalEarnings = tree.soldCount * netSalePrice;
+        const totalEarnings = tree.soldCount * tree.salePrice;
         const stockCost = tree.totalStock * tree.costPrice;
         return totalEarnings - stockCost;
     }));
@@ -341,15 +340,14 @@
     };
 
     treeData.forEach(tree => {
-        const netSalePrice = tree.salePrice / 1.2;
         const stockCost = tree.totalStock * tree.costPrice;
         const remaining = tree.totalStock - tree.soldCount;
         const soldPercentage = (tree.soldCount / tree.totalStock) * 100;
-        const totalEarnings = tree.soldCount * netSalePrice;
+        const totalEarnings = tree.soldCount * tree.salePrice;
         const netProfit = totalEarnings - stockCost;
         const remainingCost = remaining * tree.costPrice;
-        const remainingValue = remaining * netSalePrice;
-        const potentialProfit = (tree.totalStock * netSalePrice) - stockCost;
+        const remainingValue = remaining * tree.salePrice;
+        const potentialProfit = (tree.totalStock * tree.salePrice) - stockCost;
 
         totals.totalStock += tree.totalStock;
         totals.stockCost += stockCost;
@@ -366,7 +364,7 @@
             <td class="table-cell">${tree.size}</td>
             <td class="table-cell">${tree.totalStock}</td>
             <td class="table-cell">${formatCurrency(stockCost)}</td>
-            <td class="table-cell">${formatCurrency(netSalePrice)}</td>
+            <td class="table-cell">${formatCurrency(tree.salePrice)}</td>
             <td class="table-cell">${tree.soldCount}</td>
             <td class="table-cell">${formatCurrency(totalEarnings)}</td>
             <td class="table-cell" style="background-color: ${calculateProfitIntensity(netProfit, maxProfit)}">${formatCurrency(netProfit)}</td>
