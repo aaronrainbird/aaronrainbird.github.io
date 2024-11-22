@@ -1,41 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Christmas Tree Sales Dashboard</title>
+    <title>Christmas Sales Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
-        .table-cell { 
-            padding: 8px; 
+        .table-cell {
+            padding: 8px;
             border: 1px solid #e5e7eb;
             text-align: center;
         }
+
         .sortable {
             cursor: pointer;
         }
+
         .sortable:hover {
             background-color: #f3f4f6;
         }
     </style>
 </head>
+
 <body class="bg-gray-100">
     <div class="p-6">
         <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-800">Christmas Tree Sales Dashboard</h1>
-            <input type="file" accept=".csv" id="csvFile" class="file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+            <h1 class="text-2xl font-bold text-gray-800">Christmas Sales Dashboard</h1>
+            <input type="file" accept=".csv" id="csvFile"
+                class="file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
         </div>
 
         <!-- KPI Cards -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
             <div class="bg-white p-6 rounded-lg shadow">
                 <h3 class="text-sm font-medium text-gray-500">Stock Status</h3>
-                <div class="mt-2 flex items-baseline">
-                    <div class="text-2xl font-semibold text-gray-900" id="stockStatus">0/0</div>
-                    <div class="ml-2 text-sm text-gray-500">trees</div>
+                <div class="mt-2 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-2xl font-semibold text-gray-900" id="treesSold">0</div>
+                            <div class="text-sm text-gray-500">trees sold</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-semibold text-gray-900" id="treesRemaining">0/0</div>
+                            <div class="text-sm text-gray-500">remaining</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-2xl font-semibold text-gray-900" id="wreathsSold">0</div>
+                            <div class="text-sm text-gray-500">wreaths sold</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-semibold text-gray-900" id="wreathsRemaining">0/0</div>
+                            <div class="text-sm text-gray-500">remaining</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="bg-white p-6 rounded-lg shadow">
@@ -58,10 +81,11 @@
             </div>
             <div class="bg-white p-6 rounded-lg shadow">
                 <h3 class="text-sm font-medium text-gray-500">Delivery vs Collection</h3>
-                <div class="mt-2 flex items-baseline space-x-4">
+                <div class="mt-2 flex flex-col">
                     <div>
                         <span class="text-sm text-gray-500">Delivery:</span>
                         <span class="text-xl font-semibold text-gray-900" id="deliveryCount">0</span>
+                        <span class="text-sm text-gray-500" id="deliveryAmount">(£0)</span>
                     </div>
                     <div>
                         <span class="text-sm text-gray-500">Collection:</span>
@@ -77,7 +101,7 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr>
-                            <th class="table-cell sortable" onclick="sortTable(0)">Tree Size</th>
+                            <th class="table-cell sortable" onclick="sortTable(0)">Product Name</th>
                             <th class="table-cell sortable" onclick="sortTable(1, 'number')">Total Stock Purchased</th>
                             <th class="table-cell sortable" onclick="sortTable(2, 'number')">Stock Cost</th>
                             <th class="table-cell sortable" onclick="sortTable(3, 'number')">Sale Price</th>
@@ -96,7 +120,7 @@
                         <tr class="bg-gray-50 font-medium">
                             <td class="table-cell">TOTALS</td>
                             <td class="table-cell" id="totalStockPurchasedSum"></td>
-                            <td class="table-cell" id="totalStockCostSum"></td>
+                            <td class="table-cell">-</td>
                             <td class="table-cell">-</td>
                             <td class="table-cell" id="totalSoldSum"></td>
                             <td class="table-cell" id="totalEarningsSum"></td>
@@ -121,66 +145,97 @@
             <canvas id="salesTrendChart"></canvas>
         </div>
     </div>
+
     <script>
-        const treeData = [
+        const productData = [
             {
                 name: "Nordman Fir Small",
-                size: "125-150cm",
                 costPrice: 15.30,
                 salePrice: 40.00,
                 totalStock: 20,
                 soldCount: 0,
                 sku: "SQ0024007",
-                color: 'rgb(59, 130, 246)'
+                color: 'rgb(59, 130, 246)',
+                type: 'tree'
             },
             {
                 name: "Nordman Fir Medium",
-                size: "150-175cm",
                 costPrice: 21.00,
                 salePrice: 50.00,
                 totalStock: 40,
                 soldCount: 0,
                 sku: "SQ6321018",
-                color: 'rgb(16, 185, 129)'
+                color: 'rgb(16, 185, 129)',
+                type: 'tree'
             },
             {
                 name: "Nordman Fir Large",
-                size: "175-200cm",
-                costPrice: 22.50,
+                costPrice: 27.00,
                 salePrice: 60.00,
                 totalStock: 70,
                 soldCount: 0,
                 sku: "SQ2505107",
-                color: 'rgb(251, 191, 36)'
+                color: 'rgb(251, 191, 36)',
+                type: 'tree'
             },
             {
                 name: "Nordman Fir XL",
-                size: "200-225cm",
                 costPrice: 33.60,
                 salePrice: 70.00,
                 totalStock: 50,
                 soldCount: 0,
                 sku: "SQ4316627",
-                color: 'rgb(239, 68, 68)'
+                color: 'rgb(239, 68, 68)',
+                type: 'tree'
             },
             {
                 name: "Nordman Fir XXL",
-                size: "225-250cm",
                 costPrice: 40.20,
                 salePrice: 80.00,
                 totalStock: 13,
                 soldCount: 0,
                 sku: "SQ2007334",
-                color: 'rgb(139, 92, 246)'
+                color: 'rgb(139, 92, 246)',
+                type: 'tree'
+            },
+            {
+                name: "Wreath - Winter Spice",
+                costPrice: 29.78,
+                salePrice: 50.00,
+                totalStock: 10,
+                soldCount: 0,
+                sku: "SQ1834171",
+                color: 'rgb(220, 38, 38)',
+                type: 'wreath'
+            },
+            {
+                name: "Wreath - Red Floral",
+                costPrice: 24.92,
+                salePrice: 45.00,
+                totalStock: 10,
+                soldCount: 0,
+                sku: "SQ5528360",
+                color: 'rgb(236, 72, 153)',
+                type: 'wreath'
+            },
+            {
+                name: "Wreath - Fruity",
+                costPrice: 22.31,
+                salePrice: 40.00,
+                totalStock: 10,
+                soldCount: 0,
+                sku: "SQ6560145",
+                color: 'rgb(217, 119, 6)',
+                type: 'wreath'
             }
         ];
- 
+
         let salesTrendChart;
-        let dailySalesByTree = {};
+        let dailySalesByProduct = {};
         let sortDirection = 1;
         let lastSortedColumn = -1;
- 
-        document.getElementById('csvFile').addEventListener('change', function(e) {
+
+        document.getElementById('csvFile').addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 Papa.parse(file, {
@@ -189,251 +244,264 @@
                 });
             }
         });
- 
+
         function processData(results) {
-    const orders = results.data;
-    dailySalesByTree = {};
-    let deliveryCount = 0;
-    let collectionCount = 0;
-    
-    // Create a set of valid SKUs for quick lookup
-    const validSkus = new Set([
-        'SQ2505107', // Large
-        'SQ2007334', // XXL
-        'SQ0024007', // Small
-        'SQ6321018', // Medium
-        'SQ4316627'  // XL
-    ]);
+   const orders = results.data;
+   dailySalesByProduct = {};
+   let deliveryCount = 0;
+   let collectionCount = 0;
+   let totalDeliveryAmount = 0;
+   
+   // Reset product data
+   productData.forEach(product => {
+       product.soldCount = 0;
+       dailySalesByProduct[product.sku] = {};
+   });
 
-    // Reset tree data
-    treeData.forEach(tree => {
-        tree.soldCount = 0;
-        dailySalesByTree[tree.sku] = {};
-    });
+   // Group orders by Order ID
+   const orderGroups = {};
+   orders.forEach(order => {
+       const orderId = order['Order ID'];
+       if (!orderGroups[orderId]) {
+           orderGroups[orderId] = [];
+       }
+       orderGroups[orderId].push(order);
+   });
 
-    // Group orders by Order ID
-    const orderGroups = {};
-    orders.forEach(order => {
-        const orderId = order['Order ID'];
-        if (!orderGroups[orderId]) {
-            orderGroups[orderId] = [];
-        }
-        orderGroups[orderId].push(order);
-    });
+   // Process each order
+   Object.entries(orderGroups).forEach(([orderId, items]) => {
+       let hasValidProduct = false;
 
-    // Process each order
-    Object.entries(orderGroups).forEach(([orderId, items]) => {
-        // Check if order contains ONLY trees and no other products
-        const containsOnlyTrees = items.every(item => validSkus.has(item['Lineitem sku']));
-        
-        items.forEach(item => {
-            const sku = item['Lineitem sku'];
-            if (validSkus.has(sku) && item['Lineitem quantity']) {
-                const date = item['Created at'].split(' ')[0];
-                const quantity = parseInt(item['Lineitem quantity']);
-                
-                const tree = treeData.find(t => t.sku === sku);
-                if (tree) {
-                    tree.soldCount += quantity;
-                    if (!dailySalesByTree[sku][date]) {
-                        dailySalesByTree[sku][date] = 0;
-                    }
-                    dailySalesByTree[sku][date] += quantity;
-                }
-            }
-        });
+       items.forEach(item => {
+           const sku = item['Lineitem sku'];
+           const product = productData.find(p => p.sku === sku);
+           
+           if (product && item['Lineitem quantity']) {
+               hasValidProduct = true;
+               const date = item['Created at'].split(' ')[0];
+               const quantity = parseInt(item['Lineitem quantity']);
+               
+               product.soldCount += quantity;
+               if (!dailySalesByProduct[sku][date]) {
+                   dailySalesByProduct[sku][date] = 0;
+               }
+               dailySalesByProduct[sku][date] += quantity;
+           }
+       });
 
-        // Only count delivery/collection if order contains ONLY trees
-        if (containsOnlyTrees && items.length > 0) {
-            if (items[0]['Shipping Method']?.includes('Delivery')) {
-                deliveryCount++;
-            } else {
-                collectionCount++;
-            }
-        }
-    });
+       if (hasValidProduct) {
+           if (items[0]['Shipping Method']?.includes('Delivery')) {
+               deliveryCount++;
+               totalDeliveryAmount += parseFloat(items[0]['Shipping'] || 0);
+           } else {
+               collectionCount++;
+           }
+       }
+   });
 
-    document.getElementById('deliveryCount').textContent = deliveryCount;
-    document.getElementById('collectionCount').textContent = collectionCount;
+   document.getElementById('deliveryCount').textContent = deliveryCount;
+   document.getElementById('deliveryAmount').textContent = `(£${totalDeliveryAmount.toFixed(2)})`;
+   document.getElementById('collectionCount').textContent = collectionCount;
 
-    updateKPIs();
-    updateTable();
-    createTreeFilters();
-    updateSalesTrendChart('all');
+   updateStockStatus();
+   updateKPIs(totalDeliveryAmount);  // Pass shipping revenue to updateKPIs
+   updateTable();
+   createProductFilters();
+   updateSalesTrendChart('all');
 }
- 
+
+        function updateStockStatus() {
+            const treeStats = productData
+                .filter(p => p.type === 'tree')
+                .reduce((acc, tree) => ({
+                    sold: acc.sold + tree.soldCount,
+                    total: acc.total + tree.totalStock
+                }), { sold: 0, total: 0 });
+
+            const wreathStats = productData
+                .filter(p => p.type === 'wreath')
+                .reduce((acc, wreath) => ({
+                    sold: acc.sold + wreath.soldCount,
+                    total: acc.total + wreath.totalStock
+                }), { sold: 0, total: 0 });
+
+            document.getElementById('treesSold').textContent = treeStats.sold;
+            document.getElementById('treesRemaining').textContent =
+                `${treeStats.total - treeStats.sold}/${treeStats.total}`;
+            document.getElementById('wreathsSold').textContent = wreathStats.sold;
+            document.getElementById('wreathsRemaining').textContent =
+                `${wreathStats.total - wreathStats.sold}/${wreathStats.total}`;
+        }
+
         function sortTable(columnIndex, type = 'string') {
             const tbody = document.getElementById('salesData');
             const rows = Array.from(tbody.getElementsByTagName('tr'));
-            
+
             if (lastSortedColumn === columnIndex) {
                 sortDirection *= -1;
             } else {
                 sortDirection = 1;
             }
             lastSortedColumn = columnIndex;
-            
+
             rows.sort((a, b) => {
                 let aValue = a.children[columnIndex].textContent.trim();
                 let bValue = b.children[columnIndex].textContent.trim();
-                
+
                 if (type === 'number') {
                     aValue = parseFloat(aValue.replace(/[£,%]/g, ''));
                     bValue = parseFloat(bValue.replace(/[£,%]/g, ''));
                 }
-                
+
                 return sortDirection * (aValue > bValue ? 1 : -1);
             });
-            
+
             rows.forEach(row => tbody.appendChild(row));
         }
- 
+
         function calculateProfitIntensity(currentProfit, maxProfit) {
             if (currentProfit <= 0) return 'rgba(0, 0, 0, 0)';
             const intensity = Math.floor((currentProfit / maxProfit) * 100);
             return `rgba(22, 163, 74, ${intensity / 100})`;
         }
- 
+
         function calculateCostIntensity(cost, maxCost) {
             if (cost === 0) return 'rgb(0, 0, 0)';
             const intensity = Math.floor((cost / maxCost) * 255);
             return `rgb(${intensity}, 0, 0)`;
         }
- 
-        function updateKPIs() {
-            const totalSpent = treeData.reduce((sum, tree) => sum + (tree.totalStock * tree.costPrice), 0);
-            const totalRevenue = treeData.reduce((sum, tree) => sum + (tree.soldCount * tree.salePrice), 0);
-            const totalProfit = totalRevenue - totalSpent;
-            const totalStock = treeData.reduce((sum, tree) => sum + tree.totalStock, 0);
-            const stockRemaining = treeData.reduce((sum, tree) => sum + (tree.totalStock - tree.soldCount), 0);
- 
-            document.getElementById('stockStatus').textContent = `${stockRemaining}/${totalStock}`;
-            document.getElementById('totalSpent').textContent = formatCurrency(totalSpent);
-            document.getElementById('totalSales').textContent = formatCurrency(totalRevenue);
-            document.getElementById('totalProfit').textContent = formatCurrency(totalProfit);
-        }
- 
-        function updateTable() {
-    const tbody = document.getElementById('salesData');
-    tbody.innerHTML = '';
 
-    const maxProfit = Math.max(...treeData.map(tree => {
-        const totalEarnings = tree.soldCount * tree.salePrice;
-        const stockCost = tree.totalStock * tree.costPrice;
-        return totalEarnings - stockCost;
-    }));
-    
-    const maxCost = Math.max(...treeData.map(tree => 
-        (tree.totalStock - tree.soldCount) * tree.costPrice
-    ));
+        function updateKPIs(shippingRevenue = 0) {
+    const totalSpent = productData.reduce((sum, product) => sum + (product.totalStock * product.costPrice), 0);
+    const productRevenue = productData.reduce((sum, product) => sum + (product.soldCount * product.salePrice), 0);
+    const totalRevenue = productRevenue + shippingRevenue;
+    const totalProfit = totalRevenue - totalSpent;
 
-    let totals = {
-        totalStock: 0,
-        stockCost: 0,
-        totalSold: 0,
-        totalEarnings: 0,
-        netProfit: 0,
-        totalRemaining: 0,
-        remainingCost: 0,
-        remainingValue: 0,
-        potentialProfit: 0
-    };
-
-    treeData.forEach(tree => {
-        const stockCost = tree.totalStock * tree.costPrice;
-        const remaining = tree.totalStock - tree.soldCount;
-        const soldPercentage = (tree.soldCount / tree.totalStock) * 100;
-        const totalEarnings = tree.soldCount * tree.salePrice;
-        const netProfit = totalEarnings - stockCost;
-        const remainingCost = remaining * tree.costPrice;
-        const remainingValue = remaining * tree.salePrice;
-        const potentialProfit = (tree.totalStock * tree.salePrice) - stockCost;
-
-        totals.totalStock += tree.totalStock;
-        totals.stockCost += stockCost;
-        totals.totalSold += tree.soldCount;
-        totals.totalEarnings += totalEarnings;
-        totals.netProfit += netProfit;
-        totals.totalRemaining += remaining;
-        totals.remainingCost += remainingCost;
-        totals.remainingValue += remainingValue;
-        totals.potentialProfit += potentialProfit;
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="table-cell">${tree.size}</td>
-            <td class="table-cell">${tree.totalStock}</td>
-            <td class="table-cell">${formatCurrency(stockCost)}</td>
-            <td class="table-cell">${formatCurrency(tree.salePrice)}</td>
-            <td class="table-cell">${tree.soldCount}</td>
-            <td class="table-cell">${formatCurrency(totalEarnings)}</td>
-            <td class="table-cell" style="background-color: ${calculateProfitIntensity(netProfit, maxProfit)}">${formatCurrency(netProfit)}</td>
-            <td class="table-cell ${soldPercentage >= 80 ? 'text-red-600 font-semibold' : ''}">${soldPercentage.toFixed(1)}%</td>
-            <td class="table-cell ${soldPercentage >= 80 ? 'text-red-600 font-semibold' : ''}">${remaining}</td>
-            <td class="table-cell" style="color: ${calculateCostIntensity(remainingCost, maxCost)}">-${formatCurrency(remainingCost)}</td>
-            <td class="table-cell">${formatCurrency(remainingValue)}</td>
-            <td class="table-cell">${formatCurrency(potentialProfit)}</td>
-        `;
-        tbody.appendChild(row);
-    });
-
-    // Update footer totals
-    document.getElementById('totalStockPurchasedSum').textContent = totals.totalStock;
-    document.getElementById('totalStockCostSum').textContent = formatCurrency(totals.stockCost);
-    document.getElementById('totalSoldSum').textContent = totals.totalSold;
-    document.getElementById('totalEarningsSum').textContent = formatCurrency(totals.totalEarnings);
-    document.getElementById('netProfitSum').textContent = formatCurrency(totals.netProfit);
-    document.getElementById('totalPercentageSum').textContent = 
-        ((totals.totalSold / totals.totalStock) * 100).toFixed(1) + '%';
-    document.getElementById('totalRemainingSum').textContent = totals.totalRemaining;
-    document.getElementById('remainingCostSum').textContent = '-' + formatCurrency(totals.remainingCost);
-    document.getElementById('remainingValueSum').textContent = formatCurrency(totals.remainingValue);
-    document.getElementById('potentialProfitSum').textContent = formatCurrency(totals.potentialProfit);
+    document.getElementById('totalSpent').textContent = formatCurrency(totalSpent);
+    document.getElementById('totalSales').textContent = formatCurrency(totalRevenue);
+    document.getElementById('totalProfit').textContent = formatCurrency(totalProfit);
 }
- 
-        function createTreeFilters() {
+
+
+        function updateTable() {
+            const tbody = document.getElementById('salesData');
+            tbody.innerHTML = '';
+
+            const maxProfit = Math.max(...productData.map(product => {
+                const totalEarnings = product.soldCount * product.salePrice;
+                const stockCost = product.totalStock * product.costPrice;
+                return totalEarnings - stockCost;
+            }));
+
+            const maxCost = Math.max(...productData.map(product =>
+                (product.totalStock - product.soldCount) * product.costPrice
+            ));
+
+            let totals = {
+                totalStock: 0,
+                totalSold: 0,
+                totalEarnings: 0,
+                netProfit: 0,
+                totalRemaining: 0,
+                remainingCost: 0,
+                remainingValue: 0,
+                potentialProfit: 0
+            };
+
+            productData.forEach(product => {
+                const stockCost = product.totalStock * product.costPrice;
+                const remaining = product.totalStock - product.soldCount;
+                const soldPercentage = (product.soldCount / product.totalStock) * 100;
+                const totalEarnings = product.soldCount * product.salePrice;
+                const netProfit = totalEarnings - stockCost;
+                const remainingCost = remaining * product.costPrice;
+                const remainingValue = remaining * product.salePrice;
+                const potentialProfit = (product.totalStock * product.salePrice) - stockCost;
+
+                totals.totalStock += product.totalStock;
+                totals.totalSold += product.soldCount;
+                totals.totalEarnings += totalEarnings;
+                totals.netProfit += netProfit;
+                totals.totalRemaining += remaining;
+                totals.remainingCost += remainingCost;
+                totals.remainingValue += remainingValue;
+                totals.potentialProfit += potentialProfit;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="table-cell">${product.name}</td>
+                    <td class="table-cell">${product.totalStock}</td>
+                    <td class="table-cell">${formatCurrency(product.costPrice)}</td>
+                    <td class="table-cell">${formatCurrency(product.salePrice)}</td>
+                    <td class="table-cell">${product.soldCount}</td>
+                    <td class="table-cell">${formatCurrency(totalEarnings)}</td>
+                    <td class="table-cell" style="background-color: ${netProfit < 0 ? 'rgb(220, 38, 38)' : calculateProfitIntensity(netProfit, maxProfit)}; color: ${netProfit < 0 ? 'white' : 'black'}">${netProfit < 0 ? '-' : ''}${formatCurrency(netProfit)}</td>
+                    <td class="table-cell ${soldPercentage >= 80 ? 'text-red-600 font-semibold' : ''}">${soldPercentage.toFixed(1)}%</td>
+                    <td class="table-cell ${soldPercentage >= 80 ? 'text-red-600 font-semibold' : ''}">${remaining}</td>
+                    <td class="table-cell" style="color: ${calculateCostIntensity(remainingCost, maxCost)}">-${formatCurrency(remainingCost)}</td>
+                    <td class="table-cell">${formatCurrency(remainingValue)}</td>
+                    <td class="table-cell">${formatCurrency(potentialProfit)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('totalStockPurchasedSum').textContent = totals.totalStock;
+            document.getElementById('totalSoldSum').textContent = totals.totalSold;
+            document.getElementById('totalEarningsSum').textContent = formatCurrency(totals.totalEarnings);
+            document.getElementById('netProfitSum').style.backgroundColor = totals.netProfit < 0 ? 'rgb(220, 38, 38)' : 'transparent';
+            document.getElementById('netProfitSum').style.color = totals.netProfit < 0 ? 'white' : 'black';
+            document.getElementById('netProfitSum').textContent = `${totals.netProfit < 0 ? '-' : ''}${formatCurrency(totals.netProfit)}`;
+            document.getElementById('totalPercentageSum').textContent =
+                ((totals.totalSold / totals.totalStock) * 100).toFixed(1) + '%';
+            document.getElementById('totalRemainingSum').textContent = totals.totalRemaining;
+            document.getElementById('remainingCostSum').textContent = '-' + formatCurrency(totals.remainingCost);
+            document.getElementById('remainingValueSum').textContent = formatCurrency(totals.remainingValue);
+            document.getElementById('potentialProfitSum').textContent = formatCurrency(totals.potentialProfit);
+        }
+
+        function createProductFilters() {
             const container = document.getElementById('treeFilters');
             container.innerHTML = '';
- 
+
             const allButton = document.createElement('button');
             allButton.className = 'px-3 py-1 text-sm font-medium text-white bg-gray-600 rounded hover:bg-gray-700';
-            allButton.textContent = 'All Trees';
+            allButton.textContent = 'All Products';
             allButton.onclick = () => updateSalesTrendChart('all');
             container.appendChild(allButton);
- 
-            treeData.forEach(tree => {
+
+            productData.forEach(product => {
                 const button = document.createElement('button');
                 button.className = 'px-3 py-1 text-sm font-medium text-white rounded hover:opacity-80';
-                button.style.backgroundColor = tree.color;
-                button.textContent = tree.size;
-                button.onclick = () => updateSalesTrendChart(tree.sku);
+                button.style.backgroundColor = product.color;
+                button.textContent = product.name;
+                button.onclick = () => updateSalesTrendChart(product.sku);
                 container.appendChild(button);
             });
         }
- 
+
         function updateSalesTrendChart(filter) {
             const dates = new Set();
-            Object.values(dailySalesByTree).forEach(treeSales => {
-                Object.keys(treeSales).forEach(date => dates.add(date));
+            Object.values(dailySalesByProduct).forEach(productSales => {
+                Object.keys(productSales).forEach(date => dates.add(date));
             });
             const sortedDates = Array.from(dates).sort();
- 
-            const datasets = filter === 'all' 
-                ? treeData.map(tree => ({
-                    label: tree.size,
-                    data: sortedDates.map(date => dailySalesByTree[tree.sku][date] || 0),
-                    borderColor: tree.color,
-                    backgroundColor: tree.color,
+
+            const datasets = filter === 'all'
+                ? productData.map(product => ({
+                    label: product.name,
+                    data: sortedDates.map(date => dailySalesByProduct[product.sku][date] || 0),
+                    borderColor: product.color,
+                    backgroundColor: product.color,
                     tension: 0.1
                 }))
                 : [{
-                    label: treeData.find(t => t.sku === filter).size,
-                    data: sortedDates.map(date => dailySalesByTree[filter][date] || 0),
-                    borderColor: treeData.find(t => t.sku === filter).color,
-                    backgroundColor: treeData.find(t => t.sku === filter).color,
+                    label: productData.find(p => p.sku === filter).name,
+                    data: sortedDates.map(date => dailySalesByProduct[filter][date] || 0),
+                    borderColor: productData.find(p => p.sku === filter).color,
+                    backgroundColor: productData.find(p => p.sku === filter).color,
                     tension: 0.1
                 }];
- 
+
             if (salesTrendChart) salesTrendChart.destroy();
             salesTrendChart = new Chart(document.getElementById('salesTrendChart').getContext('2d'), {
                 type: 'line',
@@ -453,14 +521,14 @@
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Trees Sold'
+                                text: 'Units Sold'
                             }
                         }
                     }
                 }
             });
         }
- 
+
         function formatCurrency(value) {
             return new Intl.NumberFormat('en-GB', {
                 style: 'currency',
@@ -469,9 +537,10 @@
                 maximumFractionDigits: 2
             }).format(Math.abs(value));
         }
- 
+
         // Initialize empty chart
         updateSalesTrendChart('all');
     </script>
- </body>
- </html>
+</body>
+
+</html>
