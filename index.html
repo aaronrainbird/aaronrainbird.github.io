@@ -416,7 +416,7 @@
                 const netProfit = totalEarnings - stockCost;
                 const remainingCost = remaining * product.costPrice;
                 const remainingValue = remaining * product.salePrice;
-                const potentialProfit = (product.totalStock * product.salePrice) - stockCost;
+                const potentialProfit = (product.totalStock * product.salePrice) + stockCost;
 
                 totals.totalStock += product.totalStock;
                 totals.totalSold += product.soldCount;
