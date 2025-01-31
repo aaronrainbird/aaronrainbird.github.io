@@ -13,4 +13,3 @@ const GAME_MODES = {
 
 const DEFAULT_MODE = 'ONES_TENS';
 const DEFAULT_SIZE = 3;
-const MAX_RIGHT_COLUMN_VALUE = 9;
