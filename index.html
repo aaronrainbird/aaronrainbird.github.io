@@ -7,51 +7,44 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-    <div class="max-w-lg mx-auto p-4">
-        <!-- Game Setup -->
-        <div id="mainMenu">
-            <!-- Grid Size Selection -->
+    <div class="w-full max-w-2xl mx-auto px-2 sm:px-4">
+        <div id="mainMenu" class="mt-4">
             <div class="flex gap-2 mb-4">
-                <button data-size="3" class="size-btn flex-1 p-3 rounded-lg border-2 text-lg">3x3</button>
-                <button data-size="4" class="size-btn flex-1 p-3 rounded-lg border-2 text-lg">4x4</button>
-                <button data-size="5" class="size-btn flex-1 p-3 rounded-lg border-2 text-lg">5x5</button>
+                <button data-size="3" class="size-btn flex-1 p-3 rounded-lg border text-lg">3x3</button>
+                <button data-size="4" class="size-btn flex-1 p-3 rounded-lg border text-lg">4x4</button>
+                <button data-size="5" class="size-btn flex-1 p-3 rounded-lg border text-lg">5x5</button>
             </div>
 
-            <!-- Game Mode Selection -->
             <div class="flex gap-2 mb-6">
-                <button data-mode="ONES_TENS" class="mode-btn flex-1 p-3 rounded-lg border-2 text-lg">1s and 10s</button>
-                <button data-mode="TWOS_FIVES" class="mode-btn flex-1 p-3 rounded-lg border-2 text-lg">2s and 5s</button>
+                <button data-mode="ONES_TENS" class="mode-btn flex-1 p-3 rounded-lg border text-lg">1s and 10s</button>
+                <button data-mode="TWOS_FIVES" class="mode-btn flex-1 p-3 rounded-lg border text-lg">2s and 5s</button>
             </div>
 
-            <button id="startBtn" class="w-full p-3 mb-6 bg-black text-white rounded-lg text-lg font-semibold">
-                Start Game
-            </button>
+            <button id="startBtn" class="w-full p-3 mb-6 bg-black text-white rounded-lg text-lg">Start Game</button>
 
-            <!-- Demo Grid -->
-            <div class="bg-white rounded-lg p-4 shadow-md mb-8">
-                <h3 class="text-lg font-semibold mb-3">Pattern Preview</h3>
-                <div id="demoGrid" class="grid gap-2 mx-auto"></div>
+            <div class="bg-white rounded-lg shadow-sm mb-8">
+                <div class="p-4">
+                    <h3 class="text-lg font-medium mb-3">Pattern Preview</h3>
+                    <div id="demoGrid" class="grid gap-2"></div>
+                </div>
             </div>
 
-            <!-- Leaderboard -->
-            <div class="bg-white rounded-lg p-4 shadow-md">
-                <h3 class="text-lg font-semibold mb-3">Leaderboard</h3>
-                <div id="currentLeaderboardDisplay" class="text-sm text-gray-600 mb-2"></div>
-                <div id="leaderboard"></div>
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="p-4">
+                    <h3 class="text-lg font-medium mb-3">Leaderboard</h3>
+                    <div id="currentLeaderboardDisplay" class="text-sm text-gray-600 mb-2"></div>
+                    <div id="leaderboard"></div>
+                </div>
             </div>
         </div>
 
-        <!-- Game Screen -->
-        <div id="gameScreen" class="hidden">
+        <div id="gameScreen" class="hidden mt-4">
             <div class="flex justify-between items-center mb-4">
-                <h2 id="gameModeDisplay" class="text-lg font-semibold"></h2>
+                <h2 id="gameModeDisplay" class="text-lg font-medium"></h2>
                 <div id="timer" class="font-mono text-lg"></div>
-                <button id="exitButton" class="text-gray-600 hover:text-black">
-                    ✕
-                </button>
+                <button id="exitButton" class="text-gray-600">✕</button>
             </div>
-            
-            <div id="gameGrid" class="grid gap-2 mb-4"></div>
+            <div id="gameGrid" class="grid gap-2"></div>
         </div>
 
         <!-- Exit Confirmation Modal -->
