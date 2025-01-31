@@ -9,17 +9,31 @@ class NumberGridGame {
         this.wrongAttempts = 0;
         this.time = 0;
         this.timerInterval = null;
-
+    
         // Cache DOM elements
         this.cacheElements();
         
         // Set up game
+        this.loadLastGameSettings(); // This loads both mode and size
+        this.updateModeButtons();    // Add this
+        this.updateSizeButtons();    // Add this
         this.bindEventListeners();
-        this.loadLastPlayedMode();
         this.updateDemoGrid();
         this.updateLeaderboard();
     }
 
+    loadLastGameSettings() {
+        const lastMode = localStorage.getItem('lastGameMode');
+        const lastSize = localStorage.getItem('lastGridSize');
+        
+        this.gameMode = lastMode && GAME_MODES[lastMode] ? GAME_MODES[lastMode] : GAME_MODES.ONES_TENS;
+        this.gridSize = lastSize ? parseInt(lastSize) : 3;
+        
+        // Ensure we have valid selections
+        if (this.gridSize < 3 || this.gridSize > 5) this.gridSize = 3;
+    }
+
+    
     cacheElements() {
         this.mainMenu = document.getElementById('mainMenu');
         this.gameScreen = document.getElementById('gameScreen');
@@ -70,16 +84,13 @@ class NumberGridGame {
         this.grid.forEach((row, i) => {
             row.forEach((value, j) => {
                 const cell = document.createElement('div');
-                const baseColor = this.getColorForPosition(i, j);
                 cell.className = `
-                    game-cell
-                    aspect-square flex items-center justify-center font-bold
+                    aspect-square flex items-center justify-center text-2xl font-bold
                     border-2 rounded-lg cursor-pointer transition-all duration-200
-                    min-w-[3.5rem] min-h-[3.5rem]
+                    min-w-[3rem] min-h-[3rem] md:min-w-[4rem] md:min-h-[4rem]
+                    ${value === null ? 'bg-white' : 'bg-white'}
                 `;
-                cell.style.backgroundColor = baseColor;
-                cell.style.borderColor = 'rgb(229, 231, 235)';
-
+                
                 if (value !== null) {
                     cell.textContent = value;
                 }
@@ -161,6 +172,7 @@ class NumberGridGame {
         localStorage.setItem('lastGameMode', Object.keys(GAME_MODES).find(key => 
             GAME_MODES[key].name === this.gameMode.name
         ));
+        localStorage.setItem('lastGridSize', this.gridSize.toString());
 
         const { grid, answers } = generateGrid(this.gridSize, this.gameMode);
         this.grid = grid;

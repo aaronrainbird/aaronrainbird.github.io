@@ -1,5 +1,3 @@
-
-
 function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -62,7 +60,6 @@ function generateGrid(gridSize, gameMode) {
         answers: finalAnswers
     };
 }
-
 
 function generateDemoGrid(mode, size) {
     const startNum = mode === GAME_MODES.ONES_TENS ? 4 : 2;
