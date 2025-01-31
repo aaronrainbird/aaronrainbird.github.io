@@ -35,11 +35,9 @@ function getLeaderboard(gameMode, gridSize) {
 function generateGrid(gridSize, gameMode) {
     console.log('Generating grid...', { gridSize, gameMode });
     
-    // Only restrict the starting number to be < 10
-    let startNum;
-    do {
-        startNum = Math.floor(Math.random() * 8) + 1; // 1-9
-    } while (startNum > 9);
+    // Calculate the maximum starting number
+    const maxStartNum = 9 - ((gridSize - 1) * gameMode.rightStep);
+    const startNum = Math.max(1, Math.floor(Math.random() * maxStartNum) + 1);
     
     console.log('Using start number:', startNum);
     
@@ -59,15 +57,14 @@ function generateGrid(gridSize, gameMode) {
         finalAnswers.push(answerRow);
     }
     
-    console.log('Grid generated successfully:', { finalGrid, finalAnswers });
     return {
         grid: finalGrid,
         answers: finalAnswers
     };
 }
 
-function generateDemoGrid(mode, size = 3) {
-    console.log('Generating demo grid...', { mode, size });
+
+function generateDemoGrid(mode, size) {
     const startNum = mode === GAME_MODES.ONES_TENS ? 4 : 2;
     const grid = [];
     

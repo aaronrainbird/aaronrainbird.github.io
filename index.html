@@ -6,111 +6,71 @@
     <title>Number Grid Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen p-4 md:p-8">
-    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-6 relative">
-        <!-- Main Menu / Game Setup -->
-        <div id="mainMenu" class="space-y-8">
-            <h1 class="text-2xl font-bold text-center mb-6">Number Grid Game</h1>
-            
-            <div class="space-y-6">
-                <div>
-                    <h3 class="font-medium mb-3">Game Mode</h3>
-                    <div class="flex space-x-2">
-                        <button data-mode="ONES_TENS" class="mode-btn flex-1 px-4 py-3 rounded-lg border-2 border-gray-200">
-                            1s and 10s
-                        </button>
-                        <button data-mode="TWOS_FIVES" class="mode-btn flex-1 px-4 py-3 rounded-lg border-2 border-gray-200">
-                            2s and 5s
-                        </button>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <h4 class="font-medium mb-2">Pattern Preview:</h4>
-                        <div id="demoGrid" class="grid gap-2 w-64 mx-auto"></div>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="font-medium mb-3">Grid Size</h3>
-                    <div class="flex space-x-2">
-                        <button data-size="3" class="size-btn flex-1 px-4 py-3 rounded-lg border-2 border-gray-200">3x3</button>
-                        <button data-size="4" class="size-btn flex-1 px-4 py-3 rounded-lg border-2 border-gray-200">4x4</button>
-                        <button data-size="5" class="size-btn flex-1 px-4 py-3 rounded-lg border-2 border-gray-200">5x5</button>
-                    </div>
-                </div>
-
-                <button id="startBtn" class="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold">
-                    Start Game
-                </button>
+<body class="bg-gray-100">
+    <div class="max-w-lg mx-auto p-4">
+        <!-- Game Setup -->
+        <div id="mainMenu">
+            <!-- Grid Size Selection -->
+            <div class="flex gap-2 mb-4">
+                <button data-size="3" class="size-btn flex-1 p-3 rounded-lg border-2 text-lg">3x3</button>
+                <button data-size="4" class="size-btn flex-1 p-3 rounded-lg border-2 text-lg">4x4</button>
+                <button data-size="5" class="size-btn flex-1 p-3 rounded-lg border-2 text-lg">5x5</button>
             </div>
 
-              <!-- Leaderboard Section -->
-              <div class="mt-8">
-                <h3 class="font-medium mb-3">Current Leaderboard</h3>
-                <div class="mb-2 text-sm text-gray-600">
-                    <span id="currentLeaderboardDisplay"></span>
-                </div>
-                <div id="leaderboard" class="bg-gray-50 rounded-lg p-4"></div>
+            <!-- Game Mode Selection -->
+            <div class="flex gap-2 mb-6">
+                <button data-mode="ONES_TENS" class="mode-btn flex-1 p-3 rounded-lg border-2 text-lg">1s and 10s</button>
+                <button data-mode="TWOS_FIVES" class="mode-btn flex-1 p-3 rounded-lg border-2 text-lg">2s and 5s</button>
+            </div>
+
+            <button id="startBtn" class="w-full p-3 mb-6 bg-black text-white rounded-lg text-lg font-semibold">
+                Start Game
+            </button>
+
+            <!-- Demo Grid -->
+            <div class="bg-white rounded-lg p-4 shadow-md mb-8">
+                <h3 class="text-lg font-semibold mb-3">Pattern Preview</h3>
+                <div id="demoGrid" class="grid gap-2 mx-auto"></div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="bg-white rounded-lg p-4 shadow-md">
+                <h3 class="text-lg font-semibold mb-3">Leaderboard</h3>
+                <div id="currentLeaderboardDisplay" class="text-sm text-gray-600 mb-2"></div>
+                <div id="leaderboard"></div>
             </div>
         </div>
 
         <!-- Game Screen -->
         <div id="gameScreen" class="hidden">
-            <!-- Exit Button -->
-            <button id="exitButton" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-
-            <div class="text-center mb-6">
-                <h2 id="gameModeDisplay" class="text-xl font-bold mb-2"></h2>
-                <div id="timer" class="text-xl font-mono"></div>
-            </div>
-            
-            <div id="gameGrid" class="grid gap-3 mx-auto max-w-md"></div>
-        </div>
-
-        <!-- Modals -->
-        <div id="exitConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-xl p-6 max-w-sm w-full">
-                <h3 class="text-lg font-bold mb-4">Exit Game?</h3>
-                <p class="mb-6">Are you sure you want to exit? Your progress will be lost.</p>
-                <div class="flex space-x-3">
-                    <button id="cancelExit" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
-                        Cancel
-                    </button>
-                    <button id="confirmExit" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg">
-                        Exit
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="leaderboardSelectorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-xl p-6 max-w-sm w-full">
-                <h3 class="text-lg font-bold mb-4">Select Leaderboard</h3>
-                <div class="space-y-3 mb-6">
-                    <select id="leaderboardMode" class="w-full p-2 border rounded-lg">
-                        <option value="ONES_TENS">1s and 10s</option>
-                        <option value="TWOS_FIVES">2s and 5s</option>
-                    </select>
-                    <select id="leaderboardSize" class="w-full p-2 border rounded-lg">
-                        <option value="3">3x3</option>
-                        <option value="4">4x4</option>
-                        <option value="5">5x5</option>
-                    </select>
-                </div>
-                <button id="applyLeaderboard" class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg">
-                    Show Leaderboard
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="gameModeDisplay" class="text-lg font-semibold"></h2>
+                <div id="timer" class="font-mono text-lg"></div>
+                <button id="exitButton" class="text-gray-600 hover:text-black">
+                    ✕
                 </button>
             </div>
+            
+            <div id="gameGrid" class="grid gap-2 mb-4"></div>
         </div>
 
+        <!-- Exit Confirmation Modal -->
+        <div id="exitConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg p-6 max-w-sm w-full">
+                <h3 class="text-lg font-semibold mb-4">Exit Game?</h3>
+                <p class="mb-6">Your progress will be lost.</p>
+                <div class="flex gap-3">
+                    <button id="cancelExit" class="flex-1 p-2 border rounded-lg">Cancel</button>
+                    <button id="confirmExit" class="flex-1 p-2 bg-black text-white rounded-lg">Exit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completion Modal -->
         <div id="completionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-xl p-6 max-w-sm w-full">
+            <div class="bg-white rounded-lg p-6 max-w-sm w-full">
                 <div id="completionMessage"></div>
-                <button id="playAgainBtn" class="w-full mt-6 px-4 py-2 bg-blue-500 text-white rounded-lg">
+                <button id="playAgainBtn" class="w-full mt-6 p-3 bg-black text-white rounded-lg">
                     Play Again
                 </button>
             </div>

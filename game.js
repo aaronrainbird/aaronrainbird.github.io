@@ -1,5 +1,6 @@
 class NumberGridGame {
     constructor() {
+        // Game state
         this.gameMode = GAME_MODES[DEFAULT_MODE];
         this.gridSize = DEFAULT_SIZE;
         this.grid = null;
@@ -8,54 +9,52 @@ class NumberGridGame {
         this.wrongAttempts = 0;
         this.time = 0;
         this.timerInterval = null;
-        this.isEditing = false;
 
         // Cache DOM elements
         this.cacheElements();
+        
+        // Set up game
         this.bindEventListeners();
         this.loadLastPlayedMode();
         this.updateDemoGrid();
-        this.updateLeaderboard(); // Replace showCurrentLeaderboard with this
+        this.updateLeaderboard();
     }
 
     cacheElements() {
-        // Screens
         this.mainMenu = document.getElementById('mainMenu');
         this.gameScreen = document.getElementById('gameScreen');
-        
-        // Grid and game elements
         this.gameGrid = document.getElementById('gameGrid');
         this.gameModeDisplay = document.getElementById('gameModeDisplay');
         this.timerDisplay = document.getElementById('timer');
         this.demoGrid = document.getElementById('demoGrid');
-        
-        // Modals
         this.exitConfirmModal = document.getElementById('exitConfirmModal');
         this.completionModal = document.getElementById('completionModal');
-        this.leaderboardSelectorModal = document.getElementById('leaderboardSelectorModal');
     }
 
     bindEventListeners() {
-        // Mode and size selection
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                this.handleModeSelection(e.target.dataset.mode);
+                const mode = e.target.dataset.mode;
+                if (mode) {
+                    this.handleModeSelection(mode);
+                }
             });
         });
 
         document.querySelectorAll('.size-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                this.handleSizeSelection(parseInt(e.target.dataset.size));
+                const size = parseInt(e.target.dataset.size);
+                if (!isNaN(size)) {
+                    this.handleSizeSelection(size);
+                }
             });
         });
 
-        // Game controls
         document.getElementById('startBtn').addEventListener('click', () => this.startGame());
         document.getElementById('exitButton').addEventListener('click', () => this.showExitConfirmation());
         document.getElementById('confirmExit').addEventListener('click', () => this.exitGame());
         document.getElementById('cancelExit').addEventListener('click', () => this.hideExitConfirmation());
         document.getElementById('playAgainBtn').addEventListener('click', () => this.returnToMenu());
-
     }
 
     getColorForPosition(row, col) {
@@ -73,12 +72,13 @@ class NumberGridGame {
                 const cell = document.createElement('div');
                 const baseColor = this.getColorForPosition(i, j);
                 cell.className = `
-                    aspect-square flex items-center justify-center text-2xl font-bold
+                    game-cell
+                    aspect-square flex items-center justify-center font-bold
                     border-2 rounded-lg cursor-pointer transition-all duration-200
-                    min-w-[3rem] min-h-[3rem] md:min-w-[4rem] md:min-h-[4rem]
+                    min-w-[3.5rem] min-h-[3.5rem]
                 `;
                 cell.style.backgroundColor = baseColor;
-                cell.style.borderColor = 'rgb(229, 231, 235)'; // Tailwind gray-200
+                cell.style.borderColor = 'rgb(229, 231, 235)';
 
                 if (value !== null) {
                     cell.textContent = value;
@@ -247,10 +247,13 @@ class NumberGridGame {
 
     updateModeButtons() {
         document.querySelectorAll('.mode-btn').forEach(btn => {
-            const isSelected = GAME_MODES[btn.dataset.mode].name === this.gameMode.name;
-            btn.className = `mode-btn flex-1 px-4 py-3 rounded-lg border-2 transition-colors ${
-                isSelected ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50'
-            }`;
+            const mode = btn.dataset.mode;
+            if (mode) {
+                const isSelected = GAME_MODES[mode].name === this.gameMode.name;
+                btn.className = `mode-btn flex-1 px-4 py-3 rounded-lg border-2 transition-colors ${
+                    isSelected ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50'
+                }`;
+            }
         });
     }
 
@@ -268,15 +271,11 @@ class NumberGridGame {
         this.demoGrid.innerHTML = '';
         this.demoGrid.style.gridTemplateColumns = `repeat(${this.gridSize}, minmax(0, 1fr))`;
         
-        const cellSize = this.gridSize <= 3 ? 'text-base' : 
-                        this.gridSize === 4 ? 'text-sm' : 
-                        'text-xs';
-        
         demoGrid.forEach((row, i) => {
             row.forEach((value, j) => {
                 const cell = document.createElement('div');
                 const baseColor = this.getColorForPosition(i, j);
-                cell.className = `aspect-square flex items-center justify-center ${cellSize} font-bold border rounded bg-gray-50`;
+                cell.className = 'demo-cell aspect-square flex items-center justify-center font-bold border rounded bg-gray-50';
                 cell.style.backgroundColor = baseColor;
                 cell.textContent = value;
                 this.demoGrid.appendChild(cell);
@@ -297,17 +296,21 @@ class NumberGridGame {
     }
 
     handleModeSelection(mode) {
-        this.gameMode = GAME_MODES[mode];
-        this.updateModeButtons();
-        this.updateDemoGrid();
-        this.updateLeaderboard(); // Add this line
+        if (GAME_MODES[mode]) {
+            this.gameMode = GAME_MODES[mode];
+            this.updateModeButtons();
+            this.updateDemoGrid();
+            this.updateLeaderboard();
+        }
     }
 
     handleSizeSelection(size) {
-        this.gridSize = size;
-        this.updateSizeButtons();
-        this.updateDemoGrid();
-        this.updateLeaderboard(); // Add this line
+        if (size >= 3 && size <= 5) {
+            this.gridSize = size;
+            this.updateSizeButtons();
+            this.updateDemoGrid();
+            this.updateLeaderboard();
+        }
     }
 
     updateLeaderboard() {
