@@ -108,71 +108,87 @@ class NumberGridGame {
     }
 
     handleCellClick(row, col, cell) {
-        if (this.grid[row][col] !== null || this.isEditing) return;
-
-        this.isEditing = true;
-        this.selectedCell = { row, col, element: cell };
-
-        // Create input element
+        // If we have a selected cell, clean it up first
+        if (this.selectedCell) {
+            // Remove orange border from previous cell
+            this.selectedCell.element.style.borderColor = 'rgb(229, 231, 235)';
+            
+            // If there was input, submit it
+            if (this.selectedCell.input.value) {
+                this.checkAnswer(
+                    parseInt(this.selectedCell.input.value),
+                    this.selectedCell.row,
+                    this.selectedCell.col,
+                    this.selectedCell.element
+                );
+            }
+            this.selectedCell = null;
+        }
+     
+        // Only proceed with new input if clicking an empty cell
+        if (this.grid[row][col] !== null) return;
+     
         const input = document.createElement('input');
         input.type = 'number';
         input.className = 'w-full h-full text-center text-2xl font-bold bg-transparent focus:outline-none';
         input.style.width = '100%';
         input.style.height = '100%';
-
-        // Style the cell
+        
         cell.innerHTML = '';
-        cell.style.borderColor = 'rgb(249, 115, 22)'; // Tailwind orange-500
+        cell.style.borderColor = 'rgb(249, 115, 22)';
         cell.appendChild(input);
-
+        
+        this.selectedCell = { row, col, element: cell, input };
         input.focus();
-
-        // Handle input completion
-        const completeInput = () => {
-            if (input.value) {
-                this.checkAnswer(parseInt(input.value), row, col, cell);
-            } else {
-                cell.style.borderColor = 'rgb(229, 231, 235)'; // Reset border
-            }
-            this.isEditing = false;
-        };
-
-        input.addEventListener('blur', completeInput);
+     
         input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                completeInput();
+            if (e.key === 'Enter' && input.value) {
+                this.checkAnswer(parseInt(input.value), row, col, cell);
+                this.selectedCell = null;
                 input.blur();
             }
         });
-    }
+     }
 
-    checkAnswer(userAnswer, row, col, cell) {
+     checkAnswer(userAnswer, row, col, cell) {
         const correctAnswer = this.answers[row][col];
         const isCorrect = userAnswer === correctAnswer;
-
+     
         if (!isCorrect) {
             this.wrongAttempts++;
-        }
-
-        // Update grid state
-        this.grid[row][col] = userAnswer;
-
-        // Update cell appearance
-        cell.innerHTML = userAnswer;
-        if (isCorrect) {
-            cell.style.backgroundColor = 'rgb(220, 252, 231)'; // Light green
-            cell.style.borderColor = 'rgb(34, 197, 94)'; // Tailwind green-500
-            cell.style.color = 'rgb(21, 128, 61)'; // Tailwind green-700
+            
+            // First show wrong answer with shake
+            cell.innerHTML = userAnswer;
+            cell.className = `
+                aspect-square flex items-center justify-center text-2xl font-bold
+                rounded-lg border-2 cursor-pointer transition-all
+                bg-red-100 border-red-500 text-red-700
+                animate-[shake_0.5s_ease-in-out]
+            `;
+     
+            // After shake, transition to correct answer
+            setTimeout(() => {
+                cell.innerHTML = correctAnswer;
+                cell.className = `
+                    aspect-square flex items-center justify-center text-2xl font-bold
+                    rounded-lg border-2 cursor-pointer
+                    bg-red-100 border-red-500 text-red-700
+                `;
+            }, 1000);
         } else {
-            cell.style.backgroundColor = 'rgb(254, 226, 226)'; // Light red
-            cell.style.borderColor = 'rgb(239, 68, 68)'; // Tailwind red-500
-            cell.style.color = 'rgb(185, 28, 28)'; // Tailwind red-700
+            cell.innerHTML = userAnswer;
+            cell.className = `
+                aspect-square flex items-center justify-center text-2xl font-bold
+                rounded-lg border-2 cursor-pointer
+                bg-green-100 border-green-500 text-green-700
+            `;
         }
-
+     
+        this.grid[row][col] = isCorrect ? userAnswer : correctAnswer;
         if (this.isGridComplete()) {
             this.completeGame();
         }
-    }
+     }
 
     startGame() {
         localStorage.setItem('lastGameMode', Object.keys(GAME_MODES).find(key =>
