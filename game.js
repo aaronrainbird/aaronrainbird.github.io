@@ -9,10 +9,10 @@ class NumberGridGame {
         this.wrongAttempts = 0;
         this.time = 0;
         this.timerInterval = null;
-    
+
         // Cache DOM elements
         this.cacheElements();
-        
+
         // Set up game
         this.loadLastGameSettings(); // This loads both mode and size
         this.updateModeButtons();    // Add this
@@ -25,15 +25,15 @@ class NumberGridGame {
     loadLastGameSettings() {
         const lastMode = localStorage.getItem('lastGameMode');
         const lastSize = localStorage.getItem('lastGridSize');
-        
+
         this.gameMode = lastMode && GAME_MODES[lastMode] ? GAME_MODES[lastMode] : GAME_MODES.ONES_TENS;
         this.gridSize = lastSize ? parseInt(lastSize) : 3;
-        
+
         // Ensure we have valid selections
         if (this.gridSize < 3 || this.gridSize > 5) this.gridSize = 3;
     }
 
-    
+
     cacheElements() {
         this.mainMenu = document.getElementById('mainMenu');
         this.gameScreen = document.getElementById('gameScreen');
@@ -43,6 +43,8 @@ class NumberGridGame {
         this.demoGrid = document.getElementById('demoGrid');
         this.exitConfirmModal = document.getElementById('exitConfirmModal');
         this.completionModal = document.getElementById('completionModal');
+        this.clearScoresBtn = document.getElementById('clearScoresBtn');
+        this.clearScoresModal = document.getElementById('clearScoresModal');
     }
 
     bindEventListeners() {
@@ -69,6 +71,10 @@ class NumberGridGame {
         document.getElementById('confirmExit').addEventListener('click', () => this.exitGame());
         document.getElementById('cancelExit').addEventListener('click', () => this.hideExitConfirmation());
         document.getElementById('playAgainBtn').addEventListener('click', () => this.returnToMenu());
+        this.clearScoresBtn.addEventListener('click', () => this.showClearScoresConfirmation());
+        document.getElementById('cancelClear').addEventListener('click', () => this.hideClearScoresConfirmation());
+        document.getElementById('confirmClear').addEventListener('click', () => this.clearCurrentScores());
+
     }
 
     getColorForPosition(row, col) {
@@ -80,7 +86,7 @@ class NumberGridGame {
     renderGrid() {
         this.gameGrid.innerHTML = '';
         this.gameGrid.style.gridTemplateColumns = `repeat(${this.gridSize}, minmax(0, 1fr))`;
-        
+
         this.grid.forEach((row, i) => {
             row.forEach((value, j) => {
                 const cell = document.createElement('div');
@@ -90,7 +96,7 @@ class NumberGridGame {
                     min-w-[3rem] min-h-[3rem] md:min-w-[4rem] md:min-h-[4rem]
                     ${value === null ? 'bg-white' : 'bg-white'}
                 `;
-                
+
                 if (value !== null) {
                     cell.textContent = value;
                 }
@@ -113,12 +119,12 @@ class NumberGridGame {
         input.className = 'w-full h-full text-center text-2xl font-bold bg-transparent focus:outline-none';
         input.style.width = '100%';
         input.style.height = '100%';
-        
+
         // Style the cell
         cell.innerHTML = '';
         cell.style.borderColor = 'rgb(249, 115, 22)'; // Tailwind orange-500
         cell.appendChild(input);
-        
+
         input.focus();
 
         // Handle input completion
@@ -150,7 +156,7 @@ class NumberGridGame {
 
         // Update grid state
         this.grid[row][col] = userAnswer;
-        
+
         // Update cell appearance
         cell.innerHTML = userAnswer;
         if (isCorrect) {
@@ -169,7 +175,7 @@ class NumberGridGame {
     }
 
     startGame() {
-        localStorage.setItem('lastGameMode', Object.keys(GAME_MODES).find(key => 
+        localStorage.setItem('lastGameMode', Object.keys(GAME_MODES).find(key =>
             GAME_MODES[key].name === this.gameMode.name
         ));
         localStorage.setItem('lastGridSize', this.gridSize.toString());
@@ -184,7 +190,7 @@ class NumberGridGame {
 
         this.mainMenu.classList.add('hidden');
         this.gameScreen.classList.remove('hidden');
-        
+
         this.gameModeDisplay.textContent = `${this.gameMode.name} Mode`;
         this.renderGrid();
         this.startTimer();
@@ -215,8 +221,8 @@ class NumberGridGame {
                 <p class="text-xl text-green-600 mb-2">
                     Time: ${formatTime(this.time)}
                 </p>
-                ${leaderboardData && leaderboardData.rank <= 5 ? 
-                    `<p class="text-lg text-blue-600">New High Score! Rank #${leaderboardData.rank}</p>` : 
+                ${leaderboardData && leaderboardData.rank <= 5 ?
+                    `<p class="text-lg text-blue-600">New High Score! Rank #${leaderboardData.rank}</p>` :
                     ''}
             `;
         } else {
@@ -262,9 +268,8 @@ class NumberGridGame {
             const mode = btn.dataset.mode;
             if (mode) {
                 const isSelected = GAME_MODES[mode].name === this.gameMode.name;
-                btn.className = `mode-btn flex-1 px-4 py-3 rounded-lg border-2 transition-colors ${
-                    isSelected ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50'
-                }`;
+                btn.className = `mode-btn flex-1 px-4 py-3 rounded-lg border-2 transition-colors ${isSelected ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50'
+                    }`;
             }
         });
     }
@@ -272,9 +277,8 @@ class NumberGridGame {
     updateSizeButtons() {
         document.querySelectorAll('.size-btn').forEach(btn => {
             const isSelected = parseInt(btn.dataset.size) === this.gridSize;
-            btn.className = `size-btn flex-1 px-4 py-3 rounded-lg border-2 transition-colors ${
-                isSelected ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50'
-            }`;
+            btn.className = `size-btn flex-1 px-4 py-3 rounded-lg border-2 transition-colors ${isSelected ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 hover:bg-gray-50'
+                }`;
         });
     }
 
@@ -282,7 +286,7 @@ class NumberGridGame {
         const demoGrid = generateDemoGrid(this.gameMode, this.gridSize);
         this.demoGrid.innerHTML = '';
         this.demoGrid.style.gridTemplateColumns = `repeat(${this.gridSize}, minmax(0, 1fr))`;
-        
+
         demoGrid.forEach((row, i) => {
             row.forEach((value, j) => {
                 const cell = document.createElement('div');
@@ -325,17 +329,34 @@ class NumberGridGame {
         }
     }
 
+    showClearScoresConfirmation() {
+        this.clearScoresModal.classList.remove('hidden');
+    }
+    
+    hideClearScoresConfirmation() {
+        this.clearScoresModal.classList.add('hidden');
+    }
+    
+    clearCurrentScores() {
+        const key = `leaderboard-${this.gameMode.name}-${this.gridSize}`;
+        localStorage.removeItem(key);
+        this.updateLeaderboard();
+        this.hideClearScoresConfirmation();
+    }
+    
     updateLeaderboard() {
         const leaderboard = getLeaderboard(this.gameMode, this.gridSize);
+        const leaderboardDiv = document.getElementById('leaderboard');
         document.getElementById('currentLeaderboardDisplay').textContent = 
             `${this.gridSize}x${this.gridSize} ${this.gameMode.name}`;
         
-        const leaderboardDiv = document.getElementById('leaderboard');
         if (leaderboard.length === 0) {
             leaderboardDiv.innerHTML = '<p class="text-gray-500 text-center">No scores yet!</p>';
+            this.clearScoresBtn.classList.add('hidden');
             return;
         }
-
+    
+        this.clearScoresBtn.classList.remove('hidden');
         leaderboardDiv.innerHTML = leaderboard.map((score, index) => `
             <div class="flex justify-between items-center p-2 rounded ${index === 0 ? 'bg-yellow-50 border border-yellow-200' : ''}">
                 <div class="flex items-center gap-2">
@@ -351,13 +372,13 @@ class NumberGridGame {
         const mode = document.getElementById('leaderboardMode').value;
         const size = parseInt(document.getElementById('leaderboardSize').value);
         const selectedMode = GAME_MODES[mode];
-        
-        document.getElementById('currentLeaderboardDisplay').textContent = 
+
+        document.getElementById('currentLeaderboardDisplay').textContent =
             `Current: ${size}x${size} ${selectedMode.name}`;
-        
+
         const leaderboard = getLeaderboard(selectedMode, size);
         const leaderboardDiv = document.getElementById('leaderboard');
-        
+
         if (leaderboard.length === 0) {
             leaderboardDiv.innerHTML = '<p class="text-gray-500 text-center">No scores yet!</p>';
             return;
@@ -376,9 +397,9 @@ class NumberGridGame {
 
     showCurrentLeaderboard() {
         const leaderboard = getLeaderboard(this.gameMode, this.gridSize);
-        document.getElementById('currentLeaderboardDisplay').textContent = 
+        document.getElementById('currentLeaderboardDisplay').textContent =
             `Current: ${this.gridSize}x${this.gridSize} ${this.gameMode.name}`;
-        
+
         const leaderboardDiv = document.getElementById('leaderboard');
         if (leaderboard.length === 0) {
             leaderboardDiv.innerHTML = '<p class="text-gray-500 text-center">No scores yet!</p>';

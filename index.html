@@ -34,8 +34,12 @@
                     <h3 class="text-lg font-medium mb-3">Leaderboard</h3>
                     <div id="currentLeaderboardDisplay" class="text-sm text-gray-600 mb-2"></div>
                     <div id="leaderboard"></div>
+                    <button id="clearScoresBtn" class="hidden mt-4 w-full p-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50">
+                        Clear Scores
+                    </button>
                 </div>
             </div>
+            
         </div>
 
         <div id="gameScreen" class="hidden mt-4">
@@ -45,6 +49,17 @@
                 <button id="exitButton" class="text-gray-600">✕</button>
             </div>
             <div id="gameGrid" class="grid gap-2"></div>
+        </div>
+
+        <div id="clearScoresModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg p-6 max-w-sm w-full">
+                <h3 class="text-lg font-semibold mb-4">Clear Scores?</h3>
+                <p class="mb-6">This will permanently delete all scores for the current game mode and size.</p>
+                <div class="flex gap-3">
+                    <button id="cancelClear" class="flex-1 p-2 border rounded-lg">Cancel</button>
+                    <button id="confirmClear" class="flex-1 p-2 bg-red-500 text-white rounded-lg">Clear Scores</button>
+                </div>
+            </div>
         </div>
 
         <!-- Exit Confirmation Modal -->
