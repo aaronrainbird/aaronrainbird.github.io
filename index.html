@@ -7,24 +7,38 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
-}
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
     <div class="w-full max-w-2xl mx-auto px-2 sm:px-4">
         <div id="mainMenu" class="mt-4">
-            <div class="flex gap-2 mb-4">
+            <!-- Grid Size Section -->
+            <h3 class="font-medium mb-2">Grid Size</h3>
+            <div class="flex gap-2 mb-6">
                 <button data-size="3" class="size-btn flex-1 p-3 rounded-lg border text-lg">3x3</button>
                 <button data-size="4" class="size-btn flex-1 p-3 rounded-lg border text-lg">4x4</button>
                 <button data-size="5" class="size-btn flex-1 p-3 rounded-lg border text-lg">5x5</button>
             </div>
 
-            <div class="flex gap-2 mb-6">
+            <!-- Game Type Section -->
+            <h3 class="font-medium mb-2">Game Type</h3>
+            <div class="flex gap-2 mb-1">
                 <button data-mode="ONES_TENS" class="mode-btn flex-1 p-3 rounded-lg border text-lg">1s and 10s</button>
                 <button data-mode="TWOS_FIVES" class="mode-btn flex-1 p-3 rounded-lg border text-lg">2s and 5s</button>
+            </div>
+            <p class="text-center text-sm text-gray-500 mb-6">Game Type decides how your numbers go up or down horizontally and vertically</p>
+            
+
+            <!-- Hard Mode Toggle -->
+            <div class="mb-6">
+                <button id="hardModeBtn" class="w-full p-3 rounded-lg border text-lg">
+                    Hard Mode: Off
+                </button>
+                <p class="text-center text-sm text-gray-500 mt-1">Hard Mode hides your answers after showing feedback</p>
             </div>
 
             <button id="startBtn" class="w-full p-3 mb-6 bg-black text-white rounded-lg text-lg">Start Game</button>
@@ -38,7 +52,7 @@
 
             <div class="bg-white rounded-lg shadow-sm">
                 <div class="p-4">
-                    <h3 class="text-lg font-medium mb-3">Leaderboard</h3>
+                    <h3 id="leaderboardTitle" class="text-lg font-medium mb-3"></h3>
                     <div id="currentLeaderboardDisplay" class="text-sm text-gray-600 mb-2"></div>
                     <div id="leaderboard"></div>
                     <button id="clearScoresBtn" class="hidden mt-4 w-full p-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50">
@@ -46,7 +60,6 @@
                     </button>
                 </div>
             </div>
-            
         </div>
 
         <div id="gameScreen" class="hidden mt-4">
@@ -58,17 +71,6 @@
             <div id="gameGrid" class="grid gap-2"></div>
         </div>
 
-        <div id="clearScoresModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg p-6 max-w-sm w-full">
-                <h3 class="text-lg font-semibold mb-4">Clear Scores?</h3>
-                <p class="mb-6">This will permanently delete all scores for the current game mode and size.</p>
-                <div class="flex gap-3">
-                    <button id="cancelClear" class="flex-1 p-2 border rounded-lg">Cancel</button>
-                    <button id="confirmClear" class="flex-1 p-2 bg-red-500 text-white rounded-lg">Clear Scores</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Exit Confirmation Modal -->
         <div id="exitConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-lg p-6 max-w-sm w-full">
@@ -77,6 +79,18 @@
                 <div class="flex gap-3">
                     <button id="cancelExit" class="flex-1 p-2 border rounded-lg">Cancel</button>
                     <button id="confirmExit" class="flex-1 p-2 bg-black text-white rounded-lg">Exit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clear Scores Modal -->
+        <div id="clearScoresModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg p-6 max-w-sm w-full">
+                <h3 class="text-lg font-semibold mb-4">Clear Scores?</h3>
+                <p class="mb-6">This will permanently delete all scores for the current game mode and size.</p>
+                <div class="flex gap-3">
+                    <button id="cancelClear" class="flex-1 p-2 border rounded-lg">Cancel</button>
+                    <button id="confirmClear" class="flex-1 p-2 bg-red-500 text-white rounded-lg">Clear Scores</button>
                 </div>
             </div>
         </div>

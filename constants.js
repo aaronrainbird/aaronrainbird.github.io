@@ -9,7 +9,7 @@ const GAME_MODES = {
         rightStep: 2,
         downStep: 5
     }
-};
-
-const DEFAULT_MODE = 'ONES_TENS';
-const DEFAULT_SIZE = 3;
+ };
+ 
+ const DEFAULT_MODE = 'ONES_TENS';
+ const DEFAULT_SIZE = 3;
