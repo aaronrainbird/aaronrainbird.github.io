@@ -1,0 +1,308 @@
+/* Basic Reset & Font */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    background-color: #f8f8f8;
+    color: #333;
+    line-height: 1.6;
+    padding: 0; /* Remove body padding */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+header {
+    background-color: #fff;
+    color: #333;
+    padding: 15px 0;
+    text-align: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    position: relative; /* For positioning clear button if needed */
+}
+
+header h1 {
+    font-weight: 300; /* Lighter font weight */
+    font-size: 1.8em;
+    display: inline-block; /* Allow button beside */
+}
+
+/* Buttons */
+button {
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s ease;
+    font-family: 'Lato', sans-serif;
+    margin-top: 5px; /* Add some default top margin */
+    vertical-align: middle; /* Align with text */
+}
+.button-primary {
+    background-color: #333;
+    color: #fff;
+}
+.button-primary:hover {
+    background-color: #555;
+}
+.button-secondary {
+    background-color: #eee;
+    color: #333;
+    border: 1px solid #ccc;
+}
+.button-secondary:hover {
+    background-color: #ddd;
+}
+.button-caution {
+    background-color: #f0ad4e; /* Orange/Yellow */
+    color: #fff;
+}
+.button-caution:hover {
+    background-color: #ec971f;
+}
+button:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+.button-small { /* For clear storage button */
+    padding: 5px 10px;
+    font-size: 0.8em;
+    margin-left: 15px; /* Space from title */
+}
+
+/* Layout: Mobile First */
+main.container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.interaction-area, .result-area {
+    width: 100%;
+}
+
+/* Interaction Area */
+#scanner-view {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #fff;
+}
+#scanner-view p {
+    margin-bottom: 10px;
+    text-align: center;
+}
+#reader {
+    width: 100%; /* Take full width */
+    max-width: 400px; /* Max width */
+    min-height: 200px; /* Ensure some height */
+    border: 2px dashed #ccc;
+    margin: 0 auto 15px auto; /* Center reader */
+    background-color: #eee;
+}
+
+#input-view {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#input-view label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+#barcode-input {
+    padding: 12px 15px;
+    font-size: 1.2em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+}
+/* Submit button width handled in media query */
+
+.mobile-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* Allow wrapping */
+    margin-top: 15px;
+}
+.mobile-controls button {
+    flex-grow: 1; /* Allow buttons to grow */
+}
+
+/* Result Area */
+.result-area {
+    border: 1px solid #eee;
+    padding: 20px;
+    background-color: #fff;
+    transition: background-color 0.5s ease; /* For alert flash */
+    display: flex; /* Make it a flex container */
+    flex-direction: column; /* Stack elements vertically */
+}
+.status-box {
+    padding: 15px;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+    font-weight: bold;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1em;
+}
+#status-icon {
+    font-size: 1.5em;
+}
+
+#product-details {
+    display: flex;
+    flex-direction: column; /* Stack on mobile */
+    gap: 15px;
+    align-items: center; /* Center on mobile */
+    margin-top: 10px;
+}
+#product-image-container {
+    width: 150px; /* Fixed width */
+    height: 200px; /* Fixed height */
+    border: 1px solid #eee;
+    display: flex; /* Center image within */
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Hide overflow */
+    background-color: #f8f8f8;
+}
+#product-image {
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+    display: block;
+}
+#product-info {
+    background-color: #f8f8f8;
+    padding: 15px;
+    border: 1px solid #eee;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: monospace; /* Use monospace for alignment */
+    font-size: 0.95em;
+    width: 100%;
+    min-height: 100px;
+    border-radius: 4px;
+}
+
+/* UNDO BUTTON STYLING (MOVED) */
+#undo-scan-btn {
+    display: block; /* Make it a block element */
+    width: fit-content; /* Adjust width to content */
+    max-width: 200px; /* Optional max width */
+    margin: 20px auto 0 auto; /* Top margin, centered horizontally */
+}
+
+/* Status Highlight Styles */
+.status-found { background-color: #dff0d8; border-color: #d6e9c6; color: #3c763d;}
+.status-extra { background-color: #fcf8e3; border-color: #faebcc; color: #8a6d3b;}
+.status-notfound { background-color: #f2dede; border-color: #ebccd1; color: #a94442;}
+.status-info { background-color: #d9edf7; border-color: #bce8f1; color: #31708f;}
+.status-processing { background-color: #eee; border-color: #ddd; color: #555; }
+
+/* Visual Alert Flash for Desktop/Mobile - Only Red Needed Now */
+.alert-highlight-red {
+    background-color: #f2dede !important; /* Red flash */
+}
+
+
+/* Scan Lists */
+.scan-lists {
+    display: flex;
+    flex-direction: column; /* Stack on mobile */
+    gap: 20px;
+    margin-top: 20px;
+}
+.list-column {
+    border: 1px solid #eee;
+    padding: 15px;
+    flex: 1; /* Equal width on desktop */
+    background-color: #fff;
+}
+.list-column h3 .header-note {
+    font-size: 0.85em;
+    color: #777;
+    font-weight: normal; /* Make note less prominent */
+    margin-left: 8px;
+}
+
+.list-column ul {
+    list-style: none;
+    padding-left: 0;
+    max-height: 300px; /* Limit height */
+    overflow-y: auto; /* Add scroll */
+    border-top: 1px solid #eee;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+.list-column li {
+    padding: 5px 0;
+    border-bottom: 1px dotted #eee;
+    font-size: 0.9em;
+}
+.list-column li:last-child {
+    border-bottom: none;
+}
+
+
+/* Desktop Layout Adjustments */
+@media (min-width: 768px) {
+    main.container {
+        flex-direction: row; /* Side-by-side */
+    }
+    .interaction-area {
+        flex: 1; /* Take up available space */
+        max-width: 400px; /* Limit width */
+    }
+    .result-area {
+        flex: 2; /* Take up more space */
+    }
+    #scanner-view {
+        display: none; /* Hide camera by default on desktop */
+    }
+    #input-view {
+        display: block; /* Ensure it's block for width % */
+    }
+    #barcode-input {
+        width: 100%;
+        margin-bottom: 10px; /* Space before button */
+    }
+    /* *** Ensure Check Barcode button is full width *** */
+    #submit-manual-btn {
+        width: 100%;
+    }
+    .mobile-controls {
+        display: none; /* Hide mobile-specific buttons */
+    }
+    /* Undo button centering works on desktop too */
+    #product-details {
+        flex-direction: row; /* Side-by-side image/text */
+        align-items: flex-start;
+    }
+    #product-image-container {
+        flex-shrink: 0; /* Prevent image container from shrinking */
+    }
+    #product-info {
+       width: auto; /* Allow text to take remaining space */
+       flex-grow: 1;
+    }
+    .scan-lists {
+        flex-direction: row; /* Side-by-side lists */
+    }
+}

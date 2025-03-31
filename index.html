@@ -3,111 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Number Grid Game</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-    </style>
+    <title>Stock Check Scanner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-100">
-    <div class="w-full max-w-2xl mx-auto px-2 sm:px-4">
-        <div id="mainMenu" class="mt-4">
-            <!-- Grid Size Section -->
-            <h3 class="font-medium mb-2">Grid Size</h3>
-            <div class="flex gap-2 mb-6">
-                <button data-size="3" class="size-btn flex-1 p-3 rounded-lg border text-lg">3x3</button>
-                <button data-size="4" class="size-btn flex-1 p-3 rounded-lg border text-lg">4x4</button>
-                <button data-size="5" class="size-btn flex-1 p-3 rounded-lg border text-lg">5x5</button>
+<body>
+    <header>
+        <h1>Stock Check Tool</h1>
+        <button id="clear-storage-btn" class="button-secondary button-small">Clear Saved Scans</button>
+    </header>
+
+    <main class="container">
+
+        <section class="interaction-area">
+            <!-- Mobile Scanner View -->
+            <div id="scanner-view" class="scanner-mobile">
+                <p>Position barcode within the frame:</p>
+                <div id="reader"></div>
+                <button id="stop-scan-btn" class="button-secondary">Stop Camera</button>
             </div>
 
-            <!-- Game Type Section -->
-            <h3 class="font-medium mb-2">Game Type</h3>
-            <div class="flex gap-2 mb-1">
-                <button data-mode="ONES_TENS" class="mode-btn flex-1 p-3 rounded-lg border text-lg">1s and 10s</button>
-                <button data-mode="TWOS_FIVES" class="mode-btn flex-1 p-3 rounded-lg border text-lg">2s and 5s</button>
-            </div>
-            <p class="text-center text-sm text-gray-500 mb-6">Game Type decides how your numbers go up or down horizontally and vertically</p>
-            
-
-            <!-- Hard Mode Toggle -->
-            <div class="mb-6">
-                <button id="hardModeBtn" class="w-full p-3 rounded-lg border text-lg">
-                    Hard Mode: Off
-                </button>
-                <p class="text-center text-sm text-gray-500 mt-1">Hard Mode hides your answers after showing feedback</p>
+            <!-- Manual Input / Desktop View -->
+            <div id="input-view">
+                <label for="barcode-input">Scan or Enter Barcode:</label>
+                <input type="text" id="barcode-input" placeholder="Input barcode...">
+                <button id="submit-manual-btn" class="button-primary">Check Barcode</button>
             </div>
 
-            <button id="startBtn" class="w-full p-3 mb-6 bg-black text-white rounded-lg text-lg">Start Game</button>
+            <!-- Mobile Controls -->
+            <div class="mobile-controls">
+                 <button id="scan-again-btn" class="button-primary">Scan Next Item</button>
+                 <button id="switch-mode-btn" class="button-secondary">Switch to Type</button>
+            </div>
+        </section>
 
-            <div class="bg-white rounded-lg shadow-sm mb-8">
-                <div class="p-4">
-                    <h3 class="text-lg font-medium mb-3">Pattern Preview</h3>
-                    <div id="demoGrid" class="grid gap-2"></div>
+        <aside class="result-area">
+            <h2>Scan Result</h2>
+            <div id="result-status" class="status-box">
+                <span id="status-icon"></span>
+                <span id="status-text">Awaiting scan...</span>
+            </div>
+            <div id="product-details">
+                <div id="product-image-container">
+                    <img id="product-image" src="" alt="Product Image" style="display: none;">
                 </div>
+                <pre id="product-info">Product details will appear here.</pre>
             </div>
+             <button id="undo-scan-btn" class="button-caution" disabled>Undo Last Scan</button>
+        </aside>
 
-            <div class="bg-white rounded-lg shadow-sm">
-                <div class="p-4">
-                    <h3 id="leaderboardTitle" class="text-lg font-medium mb-3"></h3>
-                    <div id="currentLeaderboardDisplay" class="text-sm text-gray-600 mb-2"></div>
-                    <div id="leaderboard"></div>
-                    <button id="clearScoresBtn" class="hidden mt-4 w-full p-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50">
-                        Clear Scores
-                    </button>
-                </div>
-            </div>
+    </main>
+
+    <section class="scan-lists container">
+        <div class="list-column">
+            <h3>Sample Room Match (<span id="found-count">0</span>)</h3>
+            <ul id="found-list">
+                <li>(Scanned items matching the list will appear here)</li>
+            </ul>
         </div>
-
-        <div id="gameScreen" class="hidden mt-4">
-            <div class="flex justify-between items-center mb-4">
-                <h2 id="gameModeDisplay" class="text-lg font-medium"></h2>
-                <div id="timer" class="font-mono text-lg"></div>
-                <button id="exitButton" class="text-gray-600">✕</button>
-            </div>
-            <div id="gameGrid" class="grid gap-2"></div>
+        <div class="list-column">
+            <h3>
+                Non-Sample Room (<span id="non-sample-count">0</span>)
+                <span class="header-note">(Not Found / Extras - Set Aside)</span>
+            </h3>
+            <ul id="non-sample-list">
+                 <li>(Items scanned but not on list, or extras, will appear here)</li>
+            </ul>
         </div>
+    </section>
 
-        <!-- Exit Confirmation Modal -->
-        <div id="exitConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg p-6 max-w-sm w-full">
-                <h3 class="text-lg font-semibold mb-4">Exit Game?</h3>
-                <p class="mb-6">Your progress will be lost.</p>
-                <div class="flex gap-3">
-                    <button id="cancelExit" class="flex-1 p-2 border rounded-lg">Cancel</button>
-                    <button id="confirmExit" class="flex-1 p-2 bg-black text-white rounded-lg">Exit</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Clear Scores Modal -->
-        <div id="clearScoresModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg p-6 max-w-sm w-full">
-                <h3 class="text-lg font-semibold mb-4">Clear Scores?</h3>
-                <p class="mb-6">This will permanently delete all scores for the current game mode and size.</p>
-                <div class="flex gap-3">
-                    <button id="cancelClear" class="flex-1 p-2 border rounded-lg">Cancel</button>
-                    <button id="confirmClear" class="flex-1 p-2 bg-red-500 text-white rounded-lg">Clear Scores</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Completion Modal -->
-        <div id="completionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg p-6 max-w-sm w-full">
-                <div id="completionMessage"></div>
-                <button id="playAgainBtn" class="w-full mt-6 p-3 bg-black text-white rounded-lg">
-                    Play Again
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script src="constants.js"></script>
-    <script src="utils.js"></script>
-    <script src="game.js"></script>
+    <!-- Include the html5-qrcode library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <!-- Include your custom script -->
+    <script src="script.js"></script>
 </body>
 </html>
